@@ -25,7 +25,7 @@ function loop()
   --board:digitalRead()
   --print(board:digitalRead(1,2))
   
-  print(board:analogRead(4))
+  --print(board:analogRead(4))
 --[[  
   --dimming
 
