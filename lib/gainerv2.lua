@@ -410,6 +410,8 @@ end
 function board.endSampling(self)
   if self.continousMode.status then
     _sendCommand(commands.exitContinous)
+    self.continousMode.status = false
+    self.continousMode.command = {}
   else
     print("Warning: board is not in continous mode.")
   end
@@ -440,7 +442,10 @@ end
 setup()
 while true do
   loop()
-  --TODO: Coninuous mode and interrupt handling
+  if board.continousMode.status then
+    board.getSample(board)
+  end 
+  --TODO: Interrupt handling
 end
 
 
