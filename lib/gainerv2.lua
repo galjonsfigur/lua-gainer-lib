@@ -12,15 +12,17 @@ local commands = {
   getAllDigital =   {command = "R*", responseRegex = "R%x%x%x%x%*$"}, 
   setAllDigital =   {command = "Dnnnn*", responseRegex = "D%x%x%x%x%*"}, 
   setDigitalLow =   {command = "Ln*", responseRegex = "L%d%*"},
-  setDigitalHigh =  {command = "Hn*", responseRegex = "H%d%*"},  
+  setDigitalHigh =  {command = "Hn*", responseRegex = "H%d%*"},
+  getAnalog =       {command =  "Sn*", responseRegex = "S%x%x%*"},    
   getAllAnalog4 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%*$"},
   getAllAnalog8 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*$"},
   setAnalog =       {command = "anxx*", responseRegex = "a%x%x%x%*"},
   setMatrix =       {command = "anxxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*"},
-  setAllAnalog4 =      {command = "Axxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*"},
-  setAllAnalog8 =      {command = "Axxxxxxxxxxxxxxxx", responseRegex ="a%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*"},
-  -- Continuous mode responses doesn't have stars
-  getAllAnalog4C =   {command = "i*", responseRegex = "i(%x%x)(%x%x)(%x%x)(%x%x)", dataRetrieveRegex = "(%x%x)"}, 
+  setAllAnalog4 =   {command = "Axxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*"},
+  setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx", responseRegex = "a%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*"},
+  getAllAnalog4C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%x%*$"}, 
+  getAllAnalog8C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%xi%x%x%x%x%x%x%x%x%*$"},
+  exitContinous =   {command = "E*", responseRegex = "E%*"}
 }
   
 -- Analog inputs, Digital inputs, Analog outputs, Digital outputs  
@@ -383,8 +385,58 @@ function board.analogWrite(self, mode, ...)
   end
 end
 
+function board.getSample(self, ...)
+  local result = ""
+  result = _waitForResponse(self.continousMode.command)
+  assert(result, "Error: check board or support of command in configuration")
+  if self.continousMode.command == commands.getAllAnalog4C 
+  or self.continousMode.command == commands.getAllAnalog8C then
+    local i = 1
+    for value in string.gmatch(result, "(%x%x)") do
+      self.lastAnalogInput[i] = tonumber("0x"..value)
+      i = i + 1
+    end
+    if select("#", ...) > 0 and select("#", ...) <= configurations[self.configuration][1] then
+      local output = {}
+      for i = 1, select("#", ...) do
+        table.insert(output, #output + 1, self.lastAnalogInput[(select(i, ...))])  
+      end
+      return unpack(output)
+    end      
+    --TODO: add digital sampling
+  end
+end
 
-dofile("../tests/examplev2.lua")
+function board.endSampling(self)
+  if self.continousMode.status then
+    _sendCommand(commands.exitContinous)
+  else
+    print("Warning: board is not in continous mode.")
+  end
+end
+function board.beginAnalogSampling(self)
+  if configurations[self.configuration][1] == 4 then
+    _sendCommand(commands.getAllAnalog4C)
+    self.continousMode.status = true
+    self.continousMode.command = commands.getAllAnalog4C
+  elseif configurations[self.configuration][1] == 8 then
+    _sendCommand(commands.getAllAnalog8C)
+    self.continousMode.status = true
+    self.continousMode.command = commands.getAllAnalog8C  
+  else
+    print("Error: analog sampling is not supported in current configuration.")
+  end
+end
+
+-- Main program
+if #arg ~= 0 then
+  dofile(arg[1])
+else
+ error([[No script file specified.
+ Use: ./gainer path/to/script.lua
+ ]])
+end
+
 setup()
 while true do
   loop()
