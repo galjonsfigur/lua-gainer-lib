@@ -33,7 +33,7 @@ local configurations = {
 [3] = {4, 4, 8, 0},
 [4] = {8, 0, 8, 0},
 [5] = {0,16, 0, 0},
-[6] = {0, 0,16, 0},
+[6] = {0, 0, 0,16},
 [7] = {0, 8, 8, 0},
 [8] = {0, 8, 0, 8}
 }
@@ -416,6 +416,7 @@ function board.endSampling(self)
     print("Warning: board is not in continous mode.")
   end
 end
+
 function board.beginAnalogSampling(self)
   if configurations[self.configuration][1] == 4 then
     _sendCommand(commands.getAllAnalog4C)
@@ -430,6 +431,9 @@ function board.beginAnalogSampling(self)
   end
 end
 
+function board.beginDigitalSampling(self)
+
+end
 -- Main program
 if #arg ~= 0 then
   dofile(arg[1])
