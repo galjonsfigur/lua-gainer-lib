@@ -10,7 +10,8 @@ local commands = {
   ledHigh =         {command = "h*", responseRegex = "h%*"},
   ledLow =          {command = "l*", responseRegex = "l%*"},
   getAllDigital =   {command = "R*", responseRegex = "R%x%x%x%x%*$"}, 
-  setAllDigital =   {command = "Dnnnn*", responseRegex = "D%x%x%x%x%*"}, 
+  setAllDigital =   {command = "Dnnnn*", responseRegex = "D%x%x%x%x%*"},
+  getAllDigitalC =  {command = "r*", responseRegex = "r%x%x%x%x%*$"}, 
   setDigitalLow =   {command = "Ln*", responseRegex = "L%d%*"},
   setDigitalHigh =  {command = "Hn*", responseRegex = "H%d%*"},
   getAnalog =       {command =  "Sn*", responseRegex = "S%x%x%*"},    
@@ -404,6 +405,23 @@ function board.getSample(self, ...)
       return unpack(output)
     end      
     --TODO: add digital sampling
+  elseif self.continousMode.command == commands.getAllDigitalC then
+    local input = 0  
+    result = tonumber(string.match(result, "(%d%d%d%d)"))
+    for i = 0, configurations[self.configuration][2] do
+      input = bit.band(1, bit.rshift(result, i))
+      if input == 1 then self.lastDigitalInput[i + 1] = true
+      else self.lastDigitalInput[i + 1] = false end
+    end
+    
+    -- If there are additional arguments
+    if select("#", ...) > 0 and select("#", ...) <= configurations[self.configuration][2] then
+      local output = {}
+      for i = 1, select("#", ...) do
+        table.insert(output, #output + 1, self.lastDigitalInput[(select(i, ...))])  
+      end
+      return unpack(output)
+    end 
   end
 end
 
@@ -432,8 +450,15 @@ function board.beginAnalogSampling(self)
 end
 
 function board.beginDigitalSampling(self)
-
+  if configurations[self.configuration][1] ~= 0 then
+    _sendCommand(commands.getAllDigitalC)
+    self.continousMode.status = true
+    self.continousMode.command = commands.getAllDigitalC
+  else
+    print("Error: analog sampling is not supported in current configuration.")
+  end
 end
+
 -- Main program
 if #arg ~= 0 then
   dofile(arg[1])
