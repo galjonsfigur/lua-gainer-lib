@@ -26,11 +26,12 @@ local commands = {
   getAllAnalog8 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*$"},
   setAnalog =       {command = "anxx*", responseRegex = "a%x%x%x%*"},
   setMatrix =       {command = "anxxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*"},
-  setAllAnalog4 =   {command = "Axxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*"},
-  setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx", responseRegex = "a%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*"},
+  setAllAnalog4 =   {command = "Axxxxxxxx*", responseRegex = "A%*"},
+  setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx", responseRegex = "A%*"},
   getAllAnalog4C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%x%*$"}, 
   getAllAnalog8C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%xi%x%x%x%x%x%x%x%x%*$"},
-  exitContinous =   {command = "E*", responseRegex = "E%*"}
+  exitContinous =   {command = "E*", responseRegex = "E%*"},
+  setSensitivity =  {command = "Tx*", responseRegex = "T%x%*"}
 }
   
 -- Analog inputs, Digital inputs, Analog outputs, Digital outputs  
@@ -132,6 +133,13 @@ local function _interruptHandler(interruptData)
   end
     if board.interrupts.button.isr then board.interrupts.button.isr(board.interrupts.button.data)  end
  end
+end
+
+local function _checkInterrupt()
+  local interruptData = {}
+  local serialBuffer = ""
+  interruptData, serialBuffer = select(2, assert(coroutine.resume(_serialListener)))
+  if interruptData ~= {} then _interruptHandler(interruptData) end
 end
 
 local function _waitForResponse(command, timeout)
@@ -391,7 +399,7 @@ function board.analogWrite(self, mode, ...)
       })
       _waitForResponse({
       command = commands.setAllAnalog4.command,
-      responseRegex = "A%*"
+      responseRegex = commands.setAllAnalog4.responseRegex
       })
     elseif configurations[self.configuration][3] == 8 then
       _sendCommand({
@@ -400,7 +408,7 @@ function board.analogWrite(self, mode, ...)
       })
       _waitForResponse({
       command = commands.setAllAnalog8.command,
-      responseRegex = "A%*"
+      responseRegex = commands.setAllAnalog8.responseRegex
       })           
     end
     self.lastAnalogOutput = output
@@ -480,6 +488,18 @@ function board.beginDigitalSampling(self)
   end
 end
 
+function board.setSensitivity(self, value)
+  if self.configuration ~= 8 then
+    print("Error: Capacitive sensing is not supported in current configuration.")
+  else
+   _sendCommand({
+     command = string.gsub(commands.setSensitivity.command,"x", string.upper(string.format("%x", value))),
+     responseRegex = commands.setSensitivity.responseRegex
+   })
+   _waitForResponse(commands.setSensitivity)
+  end 
+end
+
 -- Main program
 if #arg ~= 0 then
   dofile(arg[1])
@@ -494,8 +514,8 @@ while true do
   loop()
   if board.continousMode.status then
     board.getSample(board)
-  end 
-  --TODO: Interrupt handling
+  end
+  _checkInterrupt() 
 end
 
 
