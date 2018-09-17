@@ -4,8 +4,15 @@ local native = require 'nativeFunctions'
 local inspect = require('inspect')
 
 local commands = {
+  [0] =             {command = "KONFIGURATION_0*", responseRegex = "KONFIGURATION_0%*"},
   [1] =             {command = "KONFIGURATION_1*", responseRegex = "KONFIGURATION_1%*"},
   [2] =             {command = "KONFIGURATION_2*", responseRegex = "KONFIGURATION_2%*"},
+  [3] =             {command = "KONFIGURATION_3*", responseRegex = "KONFIGURATION_3%*"},
+  [4] =             {command = "KONFIGURATION_4*", responseRegex = "KONFIGURATION_4%*"},
+  [5] =             {command = "KONFIGURATION_5*", responseRegex = "KONFIGURATION_5%*"},
+  [6] =             {command = "KONFIGURATION_6*", responseRegex = "KONFIGURATION_6%*"},
+  [7] =             {command = "KONFIGURATION_7*", responseRegex = "KONFIGURATION_7%*"},
+  [8] =             {command = "KONFIGURATION_8*", responseRegex = "KONFIGURATION_8%*"},
   reset =           {command = "Q*", responseRegex = "Q%*"},
   ledHigh =         {command = "h*", responseRegex = "h%*"},
   ledLow =          {command = "l*", responseRegex = "l%*"},
