@@ -1,17 +1,18 @@
 ---
 -- Simple example for LED diode dimming via potentiometer
 -- using analogRead and analogWrite on gainer device.
--- TODO: description
+-- Commection diagram:
+-- LED pin to aout 0
+-- Edge Pins of potentiometer to 5V and GND
+-- Middle pin of potentiometer to ain 0
+
+local result = 0
 function setup()
   board:init()
-  board:beginDigitalSampling()
-  for i = 1, 100 do
-    print("Sample "..i..":", board:getSample(1,2,3,4))
-    board:wait(0.5)
-  end
-  board:endSampling()
+  board.debug = false
 end
 
 function loop()
-  board:wait(1)
+  result = board:analogRead(1)
+  board:analogWrite(SINGLE, 1, result)
 end

@@ -14,7 +14,7 @@ local commands = {
   getAllDigitalC =  {command = "r*", responseRegex = "r%x%x%x%x%*$"}, 
   setDigitalLow =   {command = "Ln*", responseRegex = "L%d%*"},
   setDigitalHigh =  {command = "Hn*", responseRegex = "H%d%*"},
-  getAnalog =       {command =  "Sn*", responseRegex = "S%x%x%*"},    
+  getAnalog =       {command = "Sn*", responseRegex = "S%x%x%*"},    
   getAllAnalog4 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%*$"},
   getAllAnalog8 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*$"},
   setAnalog =       {command = "anxx*", responseRegex = "a%x%x%x%*"},
@@ -301,30 +301,44 @@ function board.setConfiguration(self, configuration)
 end
 
 function board.analogRead(self, ...)
-  local result = ""
-  if configurations[self.configuration][1] == 4 then
-    _sendCommand(commands.getAllAnalog4)
-    result = _waitForResponse(commands.getAllAnalog4)
-  elseif configurations[self.configuration][1] == 8 then
-    _sendCommand(commands.getAllAnalog8)
-    result = _waitForResponse(commands.getAllAnalog8)  
+  local result = ""  
+  -- Single pin read
+  if select("#", ...) == 1 then
+   _sendCommand({
+     command = string.gsub(commands.getAnalog.command,"n", (select(1, ...)) - 1),
+     responseRegex = commands.getAnalog.responseRegex
+   })
+   result = _waitForResponse(commands.getAnalog)
+   assert(result, "Error: Check board or support of command in configuraion")
+   result = tonumber("0x"..string.match(result, "S(%x%x)%*"))
+   self.lastAnalogInput[(select(1, ...))] = result
+   return result
+  -- For more pins 
   else
-    error("Error: command not supported in current configuration")  
-  end
-  
-  assert(result, "Error: check board or support of command in configuration")
-  local i = 1
-  for value in string.gmatch(result, "(%x%x)") do
-    self.lastAnalogInput[i] = tonumber("0x"..value)
-    i = i + 1
-  end
-  
-  if select("#", ...) > 0 and select("#", ...) <= configurations[self.configuration][1] then
-    local output = {}
-    for i = 1, select("#", ...) do
-      table.insert(output, #output + 1, self.lastAnalogInput[(select(i, ...))])  
+    if configurations[self.configuration][1] == 4 then
+      _sendCommand(commands.getAllAnalog4)
+      result = _waitForResponse(commands.getAllAnalog4)
+    elseif configurations[self.configuration][1] == 8 then
+      _sendCommand(commands.getAllAnalog8)
+      result = _waitForResponse(commands.getAllAnalog8)  
+    else
+      error("Error: command not supported in current configuration")  
     end
-    return unpack(output)
+    
+    assert(result, "Error: check board or support of command in configuration")
+    local i = 1
+    for value in string.gmatch(result, "(%x%x)") do
+      self.lastAnalogInput[i] = tonumber("0x"..value)
+      i = i + 1
+    end
+    
+    if select("#", ...) > 0 and select("#", ...) <= configurations[self.configuration][1] then
+      local output = {}
+      for i = 1, select("#", ...) do
+        table.insert(output, #output + 1, self.lastAnalogInput[(select(i, ...))])  
+      end
+      return unpack(output)
+    end
   end  
 end
 
