@@ -33,6 +33,7 @@ local commands = {
   exitContinous =   {command = "E*", responseRegex = "E%*"},
   setSensitivity =  {command = "Tx*", responseRegex = "T%x%*"},
   setSamplingMode = {command = "Mn*", responseRegex = "M%d%*"},
+  setGain =         {command = "Gxn*", responseRegex = "G%x%d%*"},
   setVerbose =      {command = "Vn*", responseRegex = "V%d%*"},
   getVersion =      {command = "?*", responseRegex =  "?(%d%.%d%.%d%.%d%d)%*"}      
 }
@@ -75,6 +76,8 @@ LOW = false
 LED = 0
 SINGLE = 1
 MULTI = 2
+VSS = 0
+AGND = 1
 
 -- Neat functions
 
@@ -521,8 +524,14 @@ function board.setSamplingMode(self, mode)
 end
 
 --TODO: Add example
---TODO: Check gaier firmware on how it works
-function board.setGain(self, value)
+function board.setGain(self, reference, value)
+  _sendCommand({
+    command = string.gsub(
+      string.gsub(commands.setGain.command, "x", string.upper(string.format("%x", value))),
+      "n", reference),
+    responseRegex = commands.setGain.responseRegex
+  })
+  _waitForResponse(commands.setGain)
 end
 
 --TODO: Add example
