@@ -31,7 +31,10 @@ local commands = {
   getAllAnalog4C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%x%*$"}, 
   getAllAnalog8C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%xi%x%x%x%x%x%x%x%x%*$"},
   exitContinous =   {command = "E*", responseRegex = "E%*"},
-  setSensitivity =  {command = "Tx*", responseRegex = "T%x%*"}
+  setSensitivity =  {command = "Tx*", responseRegex = "T%x%*"},
+  setSamplingMode = {command = "Mn*", responseRegex = "M%d%*"},
+  setVerbose =      {command = "Vn*", responseRegex = "V%d%*"},
+  getVersion =      {command = "?*", responseRegex =  "?(%d%.%d%.%d%.%d%d)%*"}      
 }
   
 -- Analog inputs, Digital inputs, Analog outputs, Digital outputs  
@@ -488,6 +491,7 @@ function board.beginDigitalSampling(self)
   end
 end
 
+--TODO: Add example
 function board.setSensitivity(self, value)
   if self.configuration ~= 8 then
     print("Error: Capacitive sensing is not supported in current configuration.")
@@ -498,6 +502,52 @@ function board.setSensitivity(self, value)
    })
    _waitForResponse(commands.setSensitivity)
   end 
+end
+
+--TODO: Add example
+function board.setSamplingMode(self, mode)
+  if mode then
+   _sendCommand({
+     command = string.gsub(commands.setSamplingMode.command,"n", "1"),
+     responseRegex = commands.setSamplingMode.responseRegex
+   })  
+  else
+   _sendCommand({
+     command = string.gsub(commands.setSamplingMode.command,"n", "0"),
+     responseRegex = commands.setSamplingMode.responseRegex
+   })    
+  end
+  _waitForResponse(commands.setSamplingMode)  
+end
+
+--TODO: Add example
+--TODO: Check gaier firmware on how it works
+function board.setGain(self, value)
+end
+
+--TODO: Add example
+function board.setVerbose(self, mode)
+  if mode then
+  _sendCommand({
+     command = string.gsub(commands.setVerbose.command,"n", "1"),
+     responseRegex = commands.setVerbose.responseRegex
+   })    
+  else
+  _sendCommand({
+     command = string.gsub(commands.setVerbose.command,"n", "0"),
+     responseRegex = commands.setVerbose.responseRegex
+   })    
+  end
+  _waitForResponse(commands.setVerbose)  
+end
+
+--TODO: Add example
+function board.getVerion(self)
+  local result = "" 
+  _sendCommand(commands.getVersion)
+  result = _waitForResponse(commands.getVersion)
+  assert(result, "Error: check board or support of command in configuration")
+  return string.match(result, commands.getVersion.responseRegex)
 end
 
 -- Main program
@@ -517,5 +567,3 @@ while true do
   end
   _checkInterrupt() 
 end
-
-
