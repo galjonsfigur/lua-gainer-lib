@@ -7,9 +7,9 @@
 -- Middle pin of potentiometer to ain 0
 
 local result = 0
+
 function setup()
   board:init()
-  board.debug = false
 end
 
 function loop()
