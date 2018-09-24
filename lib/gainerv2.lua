@@ -14,20 +14,20 @@ local commands = {
   [7] =             {command = "KONFIGURATION_7*", responseRegex = "KONFIGURATION_7%*"},
   [8] =             {command = "KONFIGURATION_8*", responseRegex = "KONFIGURATION_8%*"},
   reset =           {command = "Q*", responseRegex = "Q%*"},
-  ledHigh =         {command = "h*", responseRegex = "h%*"},
-  ledLow =          {command = "l*", responseRegex = "l%*"},
+  ledHigh =         {command = "h*", responseRegex = "h%*", verboseOnly = true},
+  ledLow =          {command = "l*", responseRegex = "l%*", verboseOnly = true},
   getAllDigital =   {command = "R*", responseRegex = "R%x%x%x%x%*$"}, 
-  setAllDigital =   {command = "Dnnnn*", responseRegex = "D%x%x%x%x%*"},
+  setAllDigital =   {command = "Dnnnn*", responseRegex = "D%x%x%x%x%*", verboseOnly = true},
   getAllDigitalC =  {command = "r*", responseRegex = "r%x%x%x%x%*$"}, 
-  setDigitalLow =   {command = "Ln*", responseRegex = "L%d%*"},
-  setDigitalHigh =  {command = "Hn*", responseRegex = "H%d%*"},
+  setDigitalLow =   {command = "Ln*", responseRegex = "L%d%*", verboseOnly = true},
+  setDigitalHigh =  {command = "Hn*", responseRegex = "H%d%*", verboseOnly = true},
   getAnalog =       {command = "Sn*", responseRegex = "S%x%x%*"},    
   getAllAnalog4 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%*$"},
   getAllAnalog8 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*$"},
-  setAnalog =       {command = "anxx*", responseRegex = "a%x%x%x%*"},
-  setMatrix =       {command = "anxxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*"},
-  setAllAnalog4 =   {command = "Axxxxxxxx*", responseRegex = "A%*"},
-  setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx", responseRegex = "A%*"},
+  setAnalog =       {command = "anxx*", responseRegex = "a%x%x%x%*", verboseOnly = true},
+  setMatrix =       {command = "anxxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*", verboseOnly = true},
+  setAllAnalog4 =   {command = "Axxxxxxxx*", responseRegex = "A%*", verboseOnly = true},
+  setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx", responseRegex = "A%*", verboseOnly = true},
   getAllAnalog4C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%x%*$"}, 
   getAllAnalog8C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%xi%x%x%x%x%x%x%x%x%*$"},
   exitContinous =   {command = "E*", responseRegex = "E%*"},
@@ -55,7 +55,7 @@ board = {
   -- Static data 
   serialPort = "/dev/ttyUSB0",
   debug = true, 
-  verboseMode = false,
+  verboseMode = true,
   -- Other
   shrinkBuffer = 0, -- Counting from the end of serial buffer
   -- Gainer parameters
@@ -150,6 +150,7 @@ end
 
 local function _waitForResponse(command, timeout)
   if board.debug then print("Command:", command.command) end
+  if not board.verboseMode and command.verboseOnly then return end
   local maxTime = timeout or 1.5 -- Default timeout in seconds
   local interruptData = {}
   local serialBuffer = ""
@@ -196,6 +197,19 @@ function board.init(self, serialPort, configuration)
   _waitForResponse(commands.reset)
   native.sleep(0.05) -- Reset takes time
   
+  if self.verboseMode then
+  _sendCommand({
+     command = string.gsub(commands.setVerbose.command,"n", "1"),
+     responseRegex = commands.setVerbose.responseRegex
+   })    
+  else
+  _sendCommand({
+     command = string.gsub(commands.setVerbose.command,"n", "0"),
+     responseRegex = commands.setVerbose.responseRegex
+   })    
+  end
+  _waitForResponse(commands.setVerbose)  
+  native.sleep(0.05) -- Setting takes time
   
   _sendCommand(commands[self.configuration])
   _waitForResponse(commands[self.configuration])
@@ -439,7 +453,6 @@ function board.getSample(self, ...)
       end
       return unpack(output)
     end      
-    --TODO: add digital sampling
   elseif self.continousMode.command == commands.getAllDigitalC then
     local input = 0  
     result = tonumber(string.match(result, "(%d%d%d%d)"))
@@ -532,22 +545,6 @@ function board.setGain(self, reference, value)
     responseRegex = commands.setGain.responseRegex
   })
   _waitForResponse(commands.setGain)
-end
-
---TODO: Add example
-function board.setVerbose(self, mode)
-  if mode then
-  _sendCommand({
-     command = string.gsub(commands.setVerbose.command,"n", "1"),
-     responseRegex = commands.setVerbose.responseRegex
-   })    
-  else
-  _sendCommand({
-     command = string.gsub(commands.setVerbose.command,"n", "0"),
-     responseRegex = commands.setVerbose.responseRegex
-   })    
-  end
-  _waitForResponse(commands.setVerbose)  
 end
 
 --TODO: Add example
