@@ -267,7 +267,7 @@ end
 function board.digitalWrite(self, mode, ...)
   assert(select("#", ...) ~= 0, "Error: not enough arguments.")
   if select("#", ...) == 1 then        
-    if mode then
+    if mode == HIGH then
        if (select(1, ...)) == LED then 
         _sendCommand(commands.ledHigh)
         _waitForResponse(commands.ledHigh)       
