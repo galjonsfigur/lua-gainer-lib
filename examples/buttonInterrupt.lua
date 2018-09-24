@@ -1,5 +1,5 @@
 ---
--- Example for using button interrupt to control LED
+-- Example for using button interrupt to control on-board LED on gainer device.
 
 local prevButtonState = false
 
