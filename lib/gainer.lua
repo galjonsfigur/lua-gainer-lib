@@ -77,7 +77,7 @@ local board = {
 }
 
 -- Neat functions
-
+--TODO: Better implementation
 local function pack(...)
   return {...}
 end
@@ -98,7 +98,8 @@ function M.delay(s)
 end
 -- Serial interface is table
 local _serialListener = coroutine.create( function(serialInterface)
-  local serialBuffer, regexBuffer, r
+  local serialBuffer = " "
+  local regexBuffer, r
   local interruptData = {}
 
   local interrupts = { name = "button", regex = ".*([N,F])%*", data = "F" }
