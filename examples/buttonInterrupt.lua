@@ -1,25 +1,31 @@
+local gainer = require 'gainer'
+
 ---
 -- Example for using button interrupt to control on-board LED on gainer device.
+local board = gainer.new()
 
 local prevButtonState = false
 
-local buttonChanged = function(data)
+local function buttonChanged(data)
   print("Button:", data)
   if data ~= prevButtonState then
     if data == true then
-    board:digitalWrite(HIGH, LED)  
+    board:digitalWrite(gainer.HIGH, gainer.LED)  
     else
-    board:digitalWrite(LOW, LED)
+    board:digitalWrite(gainer.LOW, gainer.LED)
     end  
   end
   prevButtonState = data
 end
 
-function setup()
+local function setup()
   board:init()
   board:attatchInterrupt("button", buttonChanged)
 end
 
-function loop()
- --Empty loop
+local function loop()
+ -- Wait to not clog the CPU
+ gainer.sleep(0.01)
 end
+
+board:start(setup, loop)

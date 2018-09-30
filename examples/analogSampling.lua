@@ -1,6 +1,11 @@
+local gainer = require 'gainer'
+
 ---
 -- Simple example for analog sampling in continous mode on gainer device.
-function setup()
+
+local board = gainer.new()
+
+local function setup()
   board:init()
   board:beginAnalogSampling()
   for i = 1, 100 do
@@ -10,6 +15,8 @@ function setup()
   board:endSampling()
 end
 
-function loop()
+local function loop()
   board:wait(1)
 end
+
+board:start(setup, loop)
