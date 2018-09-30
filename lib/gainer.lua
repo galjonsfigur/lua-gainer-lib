@@ -93,7 +93,7 @@ local function _sendCommand(command)
   assert(native.serial.write(command.command), "Command write failed!")
 end
 
-function M.delay(s)
+function M.sleep(s)
   native.sleep(s)
 end
 -- Serial interface is table
@@ -160,7 +160,7 @@ local function _waitForResponse(command, self, timeout)
     findBegin, findEnd = string.find(serialBuffer, command.responseRegex)
     if findBegin then
       result = string.sub(serialBuffer,findBegin,findEnd)
-      self.shrinkBuffer = findEnd
+      self.serialInterface.shrinkBuffer = findEnd
      end
     if result ~= "" and result ~= nil then break end
     -- Check if it was an error message
@@ -253,10 +253,10 @@ function board:digitalWrite(mode, ...)
   assert(select("#", ...) ~= 0, "Error: not enough arguments.")
   if select("#", ...) == 1 then
     if mode == M.HIGH then
-       if (select(1, ...)) == M.LED then
+      if (select(1, ...)) == M.LED then
         _sendCommand(commands.ledHigh)
         _waitForResponse(commands.ledHigh, self)
-       else
+      else
         _sendCommand({
           command = string.gsub(commands.setDigitalHigh.command,"n", (select(1, ...)) - 1),
           responseRegex = commands.setDigitalHigh.responseRegex
@@ -274,14 +274,15 @@ function board:digitalWrite(mode, ...)
           responseRegex = commands.setDigitalLow.responseRegex
         })
         _waitForResponse(commands.setDigitalLow, self)
-        self.lastDigitalOutput = bit.bor(self.lastDigitalOutput, bit.lshift(0, (select(1, ...)) - 1))
+        self.lastDigitalOutput = bit.band(self.lastDigitalOutput, bit.bnot(bit.lshift(1, (select(1, ...)) - 1)))
       end
     end
 
   else
     local data = self.lastDigitalOutput
+    --TODO: better iterator
     for i = 1, select("#", ...) do
-      if mode then
+      if mode == M.HIGH then
         if (select(i, ...)) == M.LED then
           _sendCommand(commands.ledHigh)
           _waitForResponse(commands.ledHigh, self)
@@ -293,7 +294,7 @@ function board:digitalWrite(mode, ...)
           _sendCommand(commands.ledLow)
           _waitForResponse(commands.ledLow, self)
         else
-          data = bit.bor(data, bit.lshift(0, (select(i, ...)) - 1))
+          data = bit.band(data, bit.bnot(bit.lshift(1, (select(i, ...)) - 1)))
         end
       end
     end
@@ -420,6 +421,11 @@ function board:analogWrite(mode, ...)
 end
 --TODO check if working digital
 function board:getSample(...)
+  if not self.continousMode.status then
+    print("Warning: board in not in continous mode")
+    return
+  end
+ 
   local result = _waitForResponse(self.continousMode.command, self)
   assert(result, "Error: check board or support of command in configuration")
   if self.continousMode.command == commands.getAllAnalog4C
