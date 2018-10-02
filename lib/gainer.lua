@@ -22,7 +22,8 @@ local commands = {
   getAllAnalog4 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%*$"},
   getAllAnalog8 =   {command = "I*", responseRegex = "I%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*$"},
   setAnalog =       {command = "anxx*", responseRegex = "a%x%x%x%*", verboseOnly = true},
-  setMatrix =       {command = "anxxxxxxxx*", responseRegex = "a%x%x%x%x%x%x%x%x%*", verboseOnly = true},
+  setMatrix =       {command = "anxxxxxxxx*", responseRegex = "a%*$", verboseOnly = true},
+  setAllMatrix =    {command = "anxxxxxxxx*", responseRegex = "a%*a%*a%*a%*a%*a%*a%*a%*", verboseOnly = true},
   setAllAnalog4 =   {command = "Axxxxxxxx*", responseRegex = "A%*", verboseOnly = true},
   setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx", responseRegex = "A%*", verboseOnly = true},
   getAllAnalog4C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%x%*$"},
@@ -361,7 +362,24 @@ function board:analogRead(...)
   end
 end
 
+--TODO: Check if in conf 7
+function board:setMatrix(table)
+  local payload = ""
+  for i, value in ipairs(table) do
+  payload = payload .. (string.gsub(
+    string.gsub(commands.setMatrix.command, "n", i - 1),
+    "xxxxxxxx",
+    string.upper(string.format("%08x", value))))
+  end
+  _sendCommand({
+    command = payload,
+    responseRegex = commands.setMatrix.responseRegex
+  })
+  _waitForResponse(commands.setAllMatrix, self)
+end
+
 --- ... = port/column number, value OR values for all ports
+-- Can be used to control 8x8 LED Matrix
 function board:analogWrite(mode, ...)
   if mode == M.SINGLE then
     assert(select("#", ...) == 2, "Error: not enough arguments.")
