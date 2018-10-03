@@ -1,54 +1,41 @@
-local buttonChanged = function(data)
-  print("Button:", data)
+local gainer = require 'gainer'
+local simplex = require '2d'
+---
+-- Simple example for using 8x8 LED Matrix with GAINER device.
+local board = gainer.new()
+
+local buffer = {}
+local line = ""
+
+local function setup()
+  board.debug = false
+  board:init(_, 7)
 end
 
-function setup()
-  board:init()
-  board:attatchInterrupt("button", buttonChanged)
-  board.debug = true
-end
-
-
-function loop()
-  board:digitalWrite(HIGH, LED)
-  --board:digitalWrite(HIGH, 1, 3, 2, 4) 
-  --board:analogWrite(SINGLE, 1, 100) 
-  board:analogWrite(MULTI, 200, 0, 0, 0)
-  board:wait(1)
-  board:digitalWrite(LOW, LED)
-  --board:digitalWrite(LOW, 1, 3, 2, 4)
-  --board:analogWrite(SINGLE, 1, 0)
-    board:analogWrite(MULTI, _, _, _, 200)
-  
-  board:wait(1)
-  
-  --board:digitalRead()
-  --print(board:digitalRead(1,2))
-  
-  --print(board:analogRead(4))
---[[  
-  --dimming
-
-  for i = 0, 254 do
-    board:sendCommand("a0"..string.upper(string.format("%02x", i)).."*")
-    --board:analogWrite(SINGLE, 1, i)
-    board:sendCommand("a3"..string.upper(string.format("%02x", 255 - i)).."*")
-   -- board:analogWrite(SINGLE, 4, 255 - i)   
-     board:delay(0.01)
-   
+--TODO: chean code
+local function loop()
+local loopI = 1
+  for i = 1, 8 do
+    for j = 1, 8 do
+      local noise = math.ceil((simplex(math.random(1*i, 15*i),math.random(1*j, 15*j)) + 1) * 7)
+      --local noise = math.random(0,15)
+      line = line .. string.format("%x", noise)
+      --print(noise)
+    end
+    --board:analogWrite(gainer.SINGLE, i, tonumber("0x" .. line))
+    buffer[i] = tonumber("0x" .. line)
+    --print(line)
+    line = ""
   end
-  for i = 254, 0, -1 do
-      --board:analogWrite(SINGLE, 1, i)
-      --board:analogWrite(SINGLE, 4, 255 - i)     
-    board:sendCommand("a0"..string.upper(string.format("%02x", i)).."*")
-    board:sendCommand("a3"..string.upper(string.format("%02x", 255 - i)).."*")
-        board:delay(0.01)
-    
-  end 
- ]]-- 
-  --board:setConfiguration(2)
- -- board:peekDigitalInput()
-  --for i = 1, board.lastDigitalInput.lenght do
-   --   print(board.lastDigitalInput[i])
- -- end
-end
+  --for i, value in ipairs(checkerboardA) do
+  --  board:analogWrite(gainer.SINGLE, i, value)
+  --end
+  board:setMatrix(buffer)
+  board:wait(0.03)
+  --for i, value in ipairs(checkerboardB) do
+   -- board:analogWrite(gainer.SINGLE, i, value)
+  --end
+  loopI = loopI + math.random(100,10000)
+  end
+
+board:start(setup, loop)
