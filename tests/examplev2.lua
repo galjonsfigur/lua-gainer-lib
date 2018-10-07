@@ -1,5 +1,5 @@
 local gainer = require 'gainer'
-local simplex = require '2d'
+--local simplex = require '2d'
 ---
 -- Simple example for using 8x8 LED Matrix with GAINER device.
 local board = gainer.new()
@@ -17,8 +17,8 @@ local function loop()
 local loopI = 1
   for i = 1, 8 do
     for j = 1, 8 do
-      local noise = math.ceil((simplex(math.random(1*i, 15*i),math.random(1*j, 15*j)) + 1) * 7)
-      --local noise = math.random(0,15)
+      --local noise = math.ceil((simplex(math.random(1*i, 15*i),math.random(1*j, 15*j)) + 1) * 7)
+      local noise = math.random(0,15)
       line = line .. string.format("%x", noise)
       --print(noise)
     end
