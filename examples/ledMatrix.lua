@@ -30,17 +30,15 @@ local function setup()
   board:init(_, 7)
 end
 
---TODO: chean code
 local function loop()
-  --for i, value in ipairs(checkerboardA) do
-  --  board:analogWrite(gainer.SINGLE, i, value)
-  --end
+  --There are two ways to set MED Matrix: by setMatrix function like this:
   board:setMatrix(checkerboardA)
   board:wait(1)
-  --for i, value in ipairs(checkerboardB) do
-   -- board:analogWrite(gainer.SINGLE, i, value)
-  --end
-  board:setMatrix(checkerboardB)
+  --Or by simple for loop and analogWrite function like this:
+  for i, value in ipairs(checkerboardB) do
+    board:analogWrite(gainer.SINGLE, i, value)
+  end
+  --Second option is slower and flickering can be seen.
   board:wait(1)
 end
 

@@ -25,9 +25,9 @@ local commands = {
   setMatrix =       {command = "anxxxxxxxx*", responseRegex = "a%*$", verboseOnly = true},
   setAllMatrix =    {command = "anxxxxxxxx*", responseRegex = "a%*a%*a%*a%*a%*a%*a%*a%*", verboseOnly = true},
   setAllAnalog4 =   {command = "Axxxxxxxx*", responseRegex = "A%*", verboseOnly = true},
-  setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx", responseRegex = "A%*", verboseOnly = true},
+  setAllAnalog8 =   {command = "Axxxxxxxxxxxxxxxx*", responseRegex = "A%*", verboseOnly = true},
   getAllAnalog4C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%x%*$"},
-  getAllAnalog8C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%xi%x%x%x%x%x%x%x%x%*$"},
+  getAllAnalog8C =  {command = "i*", responseRegex = "i%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%*$"},
   exitContinous =   {command = "E*", responseRegex = "E%*"},
   setSensitivity =  {command = "Tx*", responseRegex = "T%x%*"},
   setSamplingMode = {command = "Mn*", responseRegex = "M%d%*"},
@@ -55,7 +55,7 @@ local configurations = {
 [5] = {0,16, 0, 0},
 [6] = {0, 0, 0,16},
 [7] = {0, 8, 8, 0},
-[8] = {0, 8, 0, 8}
+[8] = {0, 4, 0, 8}
 }
 
 local board = {
@@ -76,7 +76,7 @@ local board = {
     button = {data = "F", isr =  nil}
   }
 }
-
+--TODO: add functions like setDebug, getLastAnalog
 -- Neat functions
 --TODO: Better implementation
 local function pack(...)
@@ -281,21 +281,20 @@ function board:digitalWrite(mode, ...)
 
   else
     local data = self.lastDigitalOutput
-    --TODO: better iterator
-    for i = 1, select("#", ...) do
+    for _, key in ipairs(pack(...)) do
       if mode == M.HIGH then
-        if (select(i, ...)) == M.LED then
+        if key == M.LED then
           _sendCommand(commands.ledHigh)
           _waitForResponse(commands.ledHigh, self)
         else
-          data = bit.bor(data, bit.lshift(1, (select(i, ...)) - 1))
+          data = bit.bor(data, bit.lshift(1, key - 1))
         end
       else
-        if (select(i, ...)) == M.LED then
+        if key == M.LED then
           _sendCommand(commands.ledLow)
           _waitForResponse(commands.ledLow, self)
         else
-          data = bit.band(data, bit.bnot(bit.lshift(1, (select(i, ...)) - 1)))
+          data = bit.band(data, bit.bnot(bit.lshift(1, key - 1)))
         end
       end
     end
@@ -362,20 +361,24 @@ function board:analogRead(...)
   end
 end
 
---TODO: Check if in conf 7
 function board:setMatrix(table)
-  local payload = ""
-  for i, value in ipairs(table) do
-  payload = payload .. (string.gsub(
-    string.gsub(commands.setMatrix.command, "n", i - 1),
-    "xxxxxxxx",
-    string.upper(string.format("%08x", value))))
+  if self.configuration ~= 7 then
+     print("Warning: board is not in matrix mode 7")
+     return     
+  else
+    local payload = ""
+    for i, value in ipairs(table) do
+    payload = payload .. (string.gsub(
+      string.gsub(commands.setMatrix.command, "n", i - 1),
+      "xxxxxxxx",
+      string.upper(string.format("%08x", value))))
+    end
+    _sendCommand({
+      command = payload,
+      responseRegex = commands.setMatrix.responseRegex
+    })
+    _waitForResponse(commands.setAllMatrix, self)
   end
-  _sendCommand({
-    command = payload,
-    responseRegex = commands.setMatrix.responseRegex
-  })
-  _waitForResponse(commands.setAllMatrix, self)
 end
 
 --- ... = port/column number, value OR values for all ports
@@ -419,7 +422,6 @@ function board:analogWrite(mode, ...)
         command = (string.gsub(commands.setAllAnalog4.command, "xxxxxxxx", string.upper(payload))),
         responseRegex = commands.setAllAnalog4.responseRegex
       })
-      --TODO:Check
       _waitForResponse({
       command = commands.setAllAnalog4.command,
       responseRegex = commands.setAllAnalog4.responseRegex
@@ -437,13 +439,12 @@ function board:analogWrite(mode, ...)
     self.lastAnalogOutput = output
   end
 end
---TODO check if working digital
 function board:getSample(...)
   if not self.continousMode.status then
     print("Warning: board in not in continous mode")
     return
   end
- 
+
   local result = _waitForResponse(self.continousMode.command, self)
   assert(result, "Error: check board or support of command in configuration")
   if self.continousMode.command == commands.getAllAnalog4C
@@ -481,7 +482,7 @@ end
 function board:endSampling()
   if self.continousMode.status then
     _sendCommand(commands.exitContinous)
-    --TODO: Wait for response
+    _waitForResponse(commands.exitContinous, self)
     self.continousMode.status = false
     self.continousMode.command = {}
   else
@@ -490,13 +491,14 @@ function board:endSampling()
 end
 
 function board:beginAnalogSampling()
---TODO: Wait for response
   if configurations[self.configuration][1] == 4 then
     _sendCommand(commands.getAllAnalog4C)
+    _waitForResponse(commands.getAllAnalog4C, self)
     self.continousMode.status = true
     self.continousMode.command = commands.getAllAnalog4C
   elseif configurations[self.configuration][1] == 8 then
     _sendCommand(commands.getAllAnalog8C)
+    _waitForResponse(commands.getAllAnalog8C, self)
     self.continousMode.status = true
     self.continousMode.command = commands.getAllAnalog8C
   else
@@ -505,13 +507,13 @@ function board:beginAnalogSampling()
 end
 
 function board:beginDigitalSampling()
---TOSDO: Wait for response
-  if configurations[self.configuration][1] ~= 0 then
+  if configurations[self.configuration][2] ~= 0 then
     _sendCommand(commands.getAllDigitalC)
+    _waitForResponse(commands.getAllDigitalC, self)
     self.continousMode.status = true
     self.continousMode.command = commands.getAllDigitalC
   else
-    print("Error: analog sampling is not supported in current configuration.")
+    print("Error: digital sampling is not supported in current configuration.")
   end
 end
 
