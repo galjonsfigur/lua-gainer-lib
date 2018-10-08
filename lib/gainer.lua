@@ -33,7 +33,7 @@ local commands = {
   setSamplingMode = {command = "Mn*", responseRegex = "M%d%*"},
   setGain =         {command = "Gxn*", responseRegex = "G%x%d%*"},
   setVerbose =      {command = "Vn*", responseRegex = "V%d%*"},
-  getVersion =      {command = "?*", responseRegex =  "?(%d%.%d%.%d%.%d%d)%*"}
+  getVersion =      {command = "?*", responseRegex =  "?(%d%.%d%.%d.*)%*"}
 }
 
 local M = {
@@ -517,7 +517,6 @@ function board:beginDigitalSampling()
   end
 end
 
---TODO: Add example
 function board:setSensitivity(value)
   if self.configuration ~= 8 then
     print("Error: Capacitive sensing is not supported in current configuration.")
@@ -557,8 +556,7 @@ function board:setGain(reference, value)
   _waitForResponse(commands.setGain, self)
 end
 
---TODO: Add example
-function board:getVerion()
+function board:getVersion()
   _sendCommand(commands.getVersion)
   local result = _waitForResponse(commands.getVersion, self)
   assert(result, "Error: check board or support of command in configuration")
