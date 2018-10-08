@@ -42,8 +42,10 @@ local M = {
   LED = 0,
   SINGLE = 1,
   MULTI = 2,
-  VSS = 0,
-  AGND = 1
+  VSS = false,
+  AGND = true,
+  ALL_PORTS = false,
+  AIN_ONLY = true
 }
 -- Analog inputs, Digital inputs, Analog outputs, Digital outputs
 local configurations = {
@@ -76,13 +78,12 @@ local board = {
     button = {data = "F", isr =  nil}
   }
 }
---TODO: add functions like setDebug, getLastAnalog
 -- Neat functions
---TODO: Better implementation
 local function pack(...)
   return {...}
 end
 
+--TODO: Better implementation
 local function isEmpty(table)
   for _,_ in pairs(table) do
     return false
@@ -517,19 +518,19 @@ function board:beginDigitalSampling()
   end
 end
 
+-- Value from 1 to 16
 function board:setSensitivity(value)
   if self.configuration ~= 8 then
     print("Error: Capacitive sensing is not supported in current configuration.")
   else
    _sendCommand({
-     command = string.gsub(commands.setSensitivity.command,"x", string.upper(string.format("%x", value))),
+     command = string.gsub(commands.setSensitivity.command,"x", string.upper(string.format("%x", value - 1))),
      responseRegex = commands.setSensitivity.responseRegex
    })
    _waitForResponse(commands.setSensitivity, self)
   end
 end
 
---TODO: Add example
 function board:setSamplingMode(mode)
   if mode then
    _sendCommand({
@@ -545,14 +546,23 @@ function board:setSamplingMode(mode)
   _waitForResponse(commands.setSamplingMode, self)
 end
 
---TODO: Add example
+-- value from 1 to 16
 function board:setGain(reference, value)
-  _sendCommand({
-    command = string.gsub(
-      string.gsub(commands.setGain.command, "x", string.upper(string.format("%x", value))),
-      "n", reference),
-    responseRegex = commands.setGain.responseRegex
-  })
+  if reference then
+    _sendCommand({
+      command = string.gsub(
+        string.gsub(commands.setGain.command, "x", string.upper(string.format("%x", value - 1))),
+        "n", 1),
+      responseRegex = commands.setGain.responseRegex
+    })
+  else  
+    _sendCommand({
+      command = string.gsub(
+        string.gsub(commands.setGain.command, "x", string.upper(string.format("%x", value - 1))),
+        "n", 0),
+      responseRegex = commands.setGain.responseRegex
+    })  
+  end
   _waitForResponse(commands.setGain, self)
 end
 
@@ -563,6 +573,19 @@ function board:getVersion()
   return string.match(result, commands.getVersion.responseRegex)
 end
 
+-- Boilerplate functions
+
+function board:setDebug(mode)
+  self.debug = mode
+end
+
+function board:getLastDigitalInput()
+  return self.lastDigitalInput
+end
+
+function board:getLastAnalogInput()
+  return self.lastAnalogInput
+end
 
 function board:start(setup, loop)
   setup = setup or function() end
