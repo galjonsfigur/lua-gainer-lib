@@ -186,10 +186,8 @@ function board:init(serialPort, configuration)
   self.serialPort = serialPort or self.serialPort
   self.configuration = configuration or self.configuration
 
-  assert(native.serial.open(self.serialPort), "Open failed.");
-  if self.debug then print("Opened port socket.") end
-  assert(native.serial.setBaud(native.serial.B38400), "Set baud failed.");
-  if self.debug then print("Waiting for buffer.") end
+  assert(native.serial.open(self.serialPort, native.serial.B38400), "Open failed.");
+  if self.debug then print("Opened port socket") end
 
   _sendCommand(commands.reset)
   _waitForResponse(commands.reset, self)
