@@ -7,6 +7,7 @@ local gainer = require 'gainer'
 -- LED pin to aout 0
 -- Edge Pins of potentiometer to 5V and GND
 -- Middle pin of potentiometer to ain 0
+
 local board = gainer.new()
 
 local result = 0

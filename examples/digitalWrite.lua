@@ -2,6 +2,7 @@ local gainer = require 'gainer'
 
 ---
 -- Simple example for writing digital output on gainer device.
+
 local board = gainer.new()
 
 local function setup()
@@ -20,7 +21,7 @@ local function loop()
   board:digitalWrite(gainer.HIGH, gainer.LED)
   board:wait(1)
   -- or like this:
-  board:digitalWrite(gainer.HIGH, 1, 2, gainer.LED, 3) 
+  board:digitalWrite(gainer.HIGH, 1, 2, gainer.LED, 3)
   board:wait(1)
 
   board:digitalWrite(gainer.LOW, 1, 2, 3, 4, gainer.LED) -- setting digital low

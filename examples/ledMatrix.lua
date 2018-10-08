@@ -2,6 +2,7 @@ local gainer = require 'gainer'
 
 ---
 -- Simple example for using 8x8 LED Matrix with GAINER device.
+
 local board = gainer.new()
 
 local checkerboardA = {
@@ -27,7 +28,7 @@ local checkerboardB = {
 }
 
 local function setup()
-  board:init(_, 7)
+  board:init(nil, 7)
 end
 
 local function loop()

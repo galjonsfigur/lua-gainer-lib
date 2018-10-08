@@ -118,7 +118,7 @@ function nativeFunctions.serial.open(path, baud)
     return  false
   else
     return true
-  end	
+  end
 end
 
 function nativeFunctions.serial.write(data)

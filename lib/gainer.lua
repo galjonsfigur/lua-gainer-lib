@@ -363,7 +363,7 @@ end
 function board:setMatrix(table)
   if self.configuration ~= 7 then
      print("Warning: board is not in matrix mode 7")
-     return     
+     return
   else
     local payload = ""
     for i, value in ipairs(table) do
@@ -421,19 +421,13 @@ function board:analogWrite(mode, ...)
         command = (string.gsub(commands.setAllAnalog4.command, "xxxxxxxx", string.upper(payload))),
         responseRegex = commands.setAllAnalog4.responseRegex
       })
-      _waitForResponse({
-      command = commands.setAllAnalog4.command,
-      responseRegex = commands.setAllAnalog4.responseRegex
-      }, self)
+      _waitForResponse(commands.setAllAnalog4, self)
     elseif configurations[self.configuration][3] == 8 then
       _sendCommand({
         command = (string.gsub(commands.setAllAnalog8.command, "xxxxxxxxxxxxxxxx", string.upper(payload))),
         responseRegex = commands.setAllAnalog8.responseRegex
       })
-      _waitForResponse({
-      command = commands.setAllAnalog8.command,
-      responseRegex = commands.setAllAnalog8.responseRegex
-      }, self)
+      _waitForResponse(commands.setAllAnalog8, self)
     end
     self.lastAnalogOutput = output
   end
@@ -553,13 +547,13 @@ function board:setGain(reference, value)
         "n", 1),
       responseRegex = commands.setGain.responseRegex
     })
-  else  
+  else
     _sendCommand({
       command = string.gsub(
         string.gsub(commands.setGain.command, "x", string.upper(string.format("%x", value - 1))),
         "n", 0),
       responseRegex = commands.setGain.responseRegex
-    })  
+    })
   end
   _waitForResponse(commands.setGain, self)
 end

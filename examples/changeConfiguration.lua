@@ -2,6 +2,7 @@ local gainer = require 'gainer'
 
 ---
 -- Simple example for changing configurations on gainer device.
+
 local board = gainer.new()
 
 local function setup()

@@ -1,6 +1,8 @@
 local gainer = require 'gainer'
+
 ---
 -- Simple example for digital sampling in continous mode on gainer device.
+
 local board = gainer.new()
 
 local function buttonInterrupt()
@@ -11,7 +13,7 @@ end
 
 local function setup()
   board:init()
-  board:attatchInterrupt("button", buttonInterrupt)  
+  board:attatchInterrupt("button", buttonInterrupt)
   board:beginDigitalSampling()
 end
 

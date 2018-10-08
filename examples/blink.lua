@@ -2,9 +2,11 @@ local gainer = require 'gainer'
 
 ---
 -- Simple example for blinking on-board LED on gainer device.
+
 local board = gainer.new()
 
 local function setup()
+
   ---
   -- Default port is /dev/ttyUSB0 and default configuration is 1
   -- if your serial port adress is different (for example /dev/ttyUSB1

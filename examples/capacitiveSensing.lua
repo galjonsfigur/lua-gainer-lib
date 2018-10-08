@@ -1,11 +1,13 @@
 local gainer = require 'gainer'
+
 ---
 -- Simple example for capacitive sensing in continuous mode on gainer device.
 -- TODO: make practical example of connection
+
 local board = gainer.new()
 
 local function setup()
-  board:init(_, 8) --Capacitive sensing mode
+  board:init(nil, 8) --Capacitive sensing mode
   board:setSensitivity(1)
 end
 

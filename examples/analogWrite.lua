@@ -1,4 +1,5 @@
 local gainer = require 'gainer'
+
 ---
 -- Simple example for writing analog output on gainer device.
 
@@ -10,16 +11,16 @@ end
 
 local function loop()
   -- On gainer device, writing to only 1 output like this:
-  board:analogWrite(SINGLE, 1, 123)
+  board:analogWrite(gainer.SINGLE, 1, 123)
   board:wait(1)
   -- uses different command than writing to multiple outputs like this:
-  board:analogWrite(MULTI, 56, 44, 255, 5)
+  board:analogWrite(gainer.MULTI, 56, 44, 255, 5)
   board:wait(1)
   -- but both methods can be used.
   -- It is possible to only preserve inputs like this:
-  board:analogWrite(MULTI, 56, _, _, 5)
+  board:analogWrite(gainer.MULTI, 56, nil, nil, 5)
   board:wait(1)
-  board:analogWrite(MULTI, 0, 0, 0, 0) -- setting analog 0 - no voltage
+  board:analogWrite(gainer.MULTI, 0, 0, 0, 0) -- setting analog 0 - no voltage
   board:wait(1)
 end
 

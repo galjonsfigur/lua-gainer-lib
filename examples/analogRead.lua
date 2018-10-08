@@ -15,7 +15,7 @@ local function loop()
   -- uses different command than reading multiple inputs like this:
   print("Multiple input:", board:analogRead(1, 2, 3, 4))
   -- but both methods can be used.
-  
+
   board:wait(1) -- Wait 1 second to not spam console
 end
 

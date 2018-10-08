@@ -18,7 +18,7 @@ local function loop()
   board:setGain(gainer.AGND, 1)
   print("Minimum gain, AGND reference:", board:analogRead(1))
   board:setGain(gainer.AGND, 16)
-  print("Maximum gain, AGND reference:",board:analogRead(1)) 
+  print("Maximum gain, AGND reference:",board:analogRead(1))
   board:wait(1) -- Wait 1 second to not spam console
 end
 
