@@ -63,8 +63,8 @@ local configurations = {
 local board = {
   -- Static data
   serialPort = "/dev/ttyUSB0",
-  debug = true,
-  verboseMode = true,
+  debug = false,
+  verboseMode = false,
   -- Other
   serialInterface = {shrinkBuffer = 0}, -- Counting from the end of serial buffer
   -- Gainer parameters
@@ -569,6 +569,10 @@ end
 
 function board:setDebug(mode)
   self.debug = mode
+end
+
+function board:setVerbose(mode)
+  self.verbose = mode
 end
 
 function board:getLastDigitalInput()
