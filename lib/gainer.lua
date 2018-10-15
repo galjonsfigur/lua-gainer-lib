@@ -1,3 +1,12 @@
+---
+-- LuaJIT library to control GAINER - an USB I/O board
+-- for educational purpose. It uses serial port connection and simple commands
+-- allowing for easily use digital input, digital output, analog input
+-- and analog output from environment.
+-- @module gainer
+-- @author galion
+-- @license MIT
+
 local native = require 'nativeFunctions'
 
 local commands = {
