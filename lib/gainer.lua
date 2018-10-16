@@ -3,7 +3,7 @@
 -- for educational purpose. It uses serial port connection and simple commands
 -- allowing for easily use digital input, digital output, analog input
 -- and analog output from environment.
--- @module gainer
+-- @script gainer
 -- @author galion
 -- @license MIT
 
@@ -104,10 +104,14 @@ local function _sendCommand(command)
   assert(native.serial.write(command.command), "Command write failed!")
 end
 
+---
+-- Function to stop program for s seconds.
+-- Interrupts will not be caught when using this function.
+-- @param s seconds for delay - decimals can be used.
 function M.sleep(s)
   native.sleep(s)
 end
--- Serial interface is table
+-- Serial interface is table to be able to pass it to coroutine as reference, not as a value.
 local _serialListener = coroutine.create( function(serialInterface)
   local serialBuffer = " "
   local regexBuffer, r
@@ -127,7 +131,6 @@ local _serialListener = coroutine.create( function(serialInterface)
       interrupts.data = regexBuffer
     end
     -- "Send" serial buffer
-    --if not next(interruptData) then interruptData = nil end
     coroutine.yield(interruptData, serialBuffer)
     interruptData = {}
     if serialInterface.shrinkBuffer ~= 0 then
@@ -191,6 +194,13 @@ local function _waitForResponse(command, self, timeout)
 end
 
 -- Board functions
+
+---
+-- Function to init gainer liblary.
+-- @param serialPort Serial port that is connected to GAIER board like "/dev/ttyS0".
+-- Default port is "/dev/ttyUSB0"
+-- @param configuration Configuration number to set when GAINER board is connected.
+-- Default configuration is 1.
 function board:init(serialPort, configuration)
   self.serialPort = serialPort or self.serialPort
   self.configuration = configuration or self.configuration
@@ -223,10 +233,18 @@ function board:init(serialPort, configuration)
 
 end
 
+---
+-- Sets the function to run when interrupt is detected.
+-- @param isrName Interrupt name. The only one avarible now is "button".
+-- @param isr function name that wil be attached. 
 function board:attatchInterrupt(isrName, isr)
   self.interrupts[isrName].isr = isr
 end
 
+---
+--Function to delay the program for s seconds. Interrupts will be detected and in any
+--interrupts are attached, they  will run.
+--@param time time in seconds - decimals can be used.
 function board:wait(time)
   local ntime = os.clock() + time
   repeat
