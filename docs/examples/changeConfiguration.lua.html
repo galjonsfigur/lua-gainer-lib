@@ -31,14 +31,14 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>advancedAnalogRead.lua</strong></li>
+  <li><a href="../examples/advancedAnalogRead.lua.html">advancedAnalogRead.lua</a></li>
   <li><a href="../examples/analogRead.lua.html">analogRead.lua</a></li>
   <li><a href="../examples/analogSampling.lua.html">analogSampling.lua</a></li>
   <li><a href="../examples/analogWrite.lua.html">analogWrite.lua</a></li>
   <li><a href="../examples/blink.lua.html">blink.lua</a></li>
   <li><a href="../examples/buttonInterrupt.lua.html">buttonInterrupt.lua</a></li>
   <li><a href="../examples/capacitiveSensing.lua.html">capacitiveSensing.lua</a></li>
-  <li><a href="../examples/changeConfiguration.lua.html">changeConfiguration.lua</a></li>
+  <li><strong>changeConfiguration.lua</strong></li>
   <li><a href="../examples/digitalRead.lua.html">digitalRead.lua</a></li>
   <li><a href="../examples/digitalSampling.lua.html">digitalSampling.lua</a></li>
   <li><a href="../examples/digitalWrite.lua.html">digitalWrite.lua</a></li>
@@ -60,31 +60,29 @@
 
 <div id="content">
 
-    <h2>advancedAnalogRead.lua</h2>
+    <h2>changeConfiguration.lua</h2>
 <pre>
 <span class="keyword">local</span> gainer = <span class="global">require</span> <span class="string">'gainer'</span>
 
 <span class="comment">---
-</span><span class="comment">-- More advanced example for reading analog input on gainer device.
+</span><span class="comment">-- Simple example for changing configurations on gainer device.
 </span>
 <span class="keyword">local</span> board = gainer.new()
 
 <span class="keyword">local</span> <span class="keyword">function</span> setup()
   board:init()
-  board:setSamplingMode(gainer.AIN_ONLY) <span class="comment">--or ALL_PORTS
-</span><span class="keyword">end</span>
+<span class="keyword">end</span>
 
 <span class="keyword">local</span> <span class="keyword">function</span> loop()
-  board:setGain(gainer.VSS, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, VSS reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.VSS, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, VSS reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, AGND reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, AGND reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
-</span><span class="keyword">end</span>
+  <span class="comment">-- It takes some time to change between
+</span>  <span class="comment">-- and current output is set to default state.
+</span>  board:setConfiguration(<span class="number">1</span>)
+  board:digitalWrite(gainer.HIGH,gainer.LED)
+  board:wait(<span class="number">1</span>)
+  board:setConfiguration(<span class="number">2</span>)
+  board:digitalWrite(gainer.LOW, gainer.LED)
+  board:wait(<span class="number">1</span>)
+<span class="keyword">end</span>
 
 board:start(setup, loop)</pre>
 

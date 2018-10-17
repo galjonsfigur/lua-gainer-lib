@@ -31,10 +31,10 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>advancedAnalogRead.lua</strong></li>
+  <li><a href="../examples/advancedAnalogRead.lua.html">advancedAnalogRead.lua</a></li>
   <li><a href="../examples/analogRead.lua.html">analogRead.lua</a></li>
   <li><a href="../examples/analogSampling.lua.html">analogSampling.lua</a></li>
-  <li><a href="../examples/analogWrite.lua.html">analogWrite.lua</a></li>
+  <li><strong>analogWrite.lua</strong></li>
   <li><a href="../examples/blink.lua.html">blink.lua</a></li>
   <li><a href="../examples/buttonInterrupt.lua.html">buttonInterrupt.lua</a></li>
   <li><a href="../examples/capacitiveSensing.lua.html">capacitiveSensing.lua</a></li>
@@ -60,31 +60,33 @@
 
 <div id="content">
 
-    <h2>advancedAnalogRead.lua</h2>
+    <h2>analogWrite.lua</h2>
 <pre>
 <span class="keyword">local</span> gainer = <span class="global">require</span> <span class="string">'gainer'</span>
 
 <span class="comment">---
-</span><span class="comment">-- More advanced example for reading analog input on gainer device.
+</span><span class="comment">-- Simple example for writing analog output on gainer device.
 </span>
 <span class="keyword">local</span> board = gainer.new()
 
 <span class="keyword">local</span> <span class="keyword">function</span> setup()
   board:init()
-  board:setSamplingMode(gainer.AIN_ONLY) <span class="comment">--or ALL_PORTS
-</span><span class="keyword">end</span>
+<span class="keyword">end</span>
 
 <span class="keyword">local</span> <span class="keyword">function</span> loop()
-  board:setGain(gainer.VSS, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, VSS reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.VSS, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, VSS reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, AGND reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, AGND reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
-</span><span class="keyword">end</span>
+  <span class="comment">-- On gainer device, writing to only 1 output like this:
+</span>  board:analogWrite(gainer.SINGLE, <span class="number">1</span>, <span class="number">123</span>)
+  board:wait(<span class="number">1</span>)
+  <span class="comment">-- uses different command than writing to multiple outputs like this:
+</span>  board:analogWrite(gainer.MULTI, <span class="number">56</span>, <span class="number">44</span>, <span class="number">255</span>, <span class="number">5</span>)
+  board:wait(<span class="number">1</span>)
+  <span class="comment">-- but both methods can be used.
+</span>  <span class="comment">-- It is possible to only preserve inputs like this:
+</span>  board:analogWrite(gainer.MULTI, <span class="number">56</span>, <span class="keyword">nil</span>, <span class="keyword">nil</span>, <span class="number">5</span>)
+  board:wait(<span class="number">1</span>)
+  board:analogWrite(gainer.MULTI, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>) <span class="comment">-- setting analog 0 - no voltage
+</span>  board:wait(<span class="number">1</span>)
+<span class="keyword">end</span>
 
 board:start(setup, loop)</pre>
 

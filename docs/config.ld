@@ -12,5 +12,17 @@ examples = {
     'examples/advancedAnalogRead.lua',
     'examples/analogRead.lua',
     'examples/analogSampling.lua',
+    'examples/analogWrite.lua',
+    'examples/blink.lua',
+    'examples/buttonInterrupt.lua',
+    'examples/capacitiveSensing.lua',
+    'examples/changeConfiguration.lua',
+    'examples/digitalRead.lua',
+    'examples/digitalSampling.lua',
+    'examples/digitalWrite.lua',
+    'examples/getVersion.lua',
+    'examples/ledDimming.lua',
+    'examples/ledMatrix.lua',
+    'examples/matrixRandom.lua',
 }
 

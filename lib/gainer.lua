@@ -105,7 +105,7 @@ local function _sendCommand(command)
 end
 
 ---
--- Function to stop program for s seconds.
+-- Halts execution of script for s seconds.
 -- Interrupts will not be caught when using this function.
 -- @param s seconds for delay - decimals can be used.
 function M.sleep(s)
@@ -196,7 +196,7 @@ end
 -- Board functions
 
 ---
--- Function to init gainer liblary.
+-- Inits gainer library.
 -- @param serialPort Serial port that is connected to GAIER board like "/dev/ttyS0".
 -- Default port is "/dev/ttyUSB0"
 -- @param configuration Configuration number to set when GAINER board is connected.
@@ -242,9 +242,10 @@ function board:attatchInterrupt(isrName, isr)
 end
 
 ---
---Function to delay the program for s seconds. Interrupts will be detected and in any
---interrupts are attached, they  will run.
---@param time time in seconds - decimals can be used.
+-- Delays the program for s seconds with detection of interrupts.
+-- Interrupts will be detected and in any
+-- interrupts are attached, they  will run.
+-- @param time time in seconds - decimals can be used.
 function board:wait(time)
   local ntime = os.clock() + time
   repeat
@@ -252,6 +253,13 @@ function board:wait(time)
   until os.clock() > ntime
 end
 
+---
+-- Gets digital outuput of GAINER board.
+-- @param ... input numbers of GAINER board. For din 0 it will be 1, for
+-- all digital inputs it will be 1,2,3,4 and so on.
+-- @return output table with booleans. For digital 1 it will be true and for digital 0 it
+-- will be false. table index with value is equal to argument number. It can also set a on-board
+-- LED when gainer.LED is used as parameter. Order of arguments does not matter.
 function board:digitalRead(...)
   local result, input
 
@@ -276,6 +284,12 @@ function board:digitalRead(...)
   end
 end
 
+---
+-- Turns on or off digital outputs of GAINER board.
+-- @param mode State to set on pin or pins. For digital 1 gainer.HIGH is used and for
+-- digital 0 gaier.LOW is used.
+-- @param ... output numbers of board. For dout 0 it will be 1 and for all all digital
+-- outputs it will be 1,2,3,4 and so on.
 function board:digitalWrite(mode, ...)
   assert(select("#", ...) ~= 0, "Error: not enough arguments.")
   if select("#", ...) == 1 then
@@ -333,6 +347,12 @@ function board:digitalWrite(mode, ...)
   end
 end
 
+---
+-- Sets new configuration of GAINER device.
+-- Functions resets GAIENR device ans sets it to a new configuration.
+-- State of pins after reset is undefined.
+-- @param configuration configutation number.
+-- 
 function board:setConfiguration(configuration)
   if configuration ~= self.configuration then
     self.configuration = configuration

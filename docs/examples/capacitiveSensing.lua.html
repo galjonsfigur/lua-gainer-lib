@@ -31,13 +31,13 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>advancedAnalogRead.lua</strong></li>
+  <li><a href="../examples/advancedAnalogRead.lua.html">advancedAnalogRead.lua</a></li>
   <li><a href="../examples/analogRead.lua.html">analogRead.lua</a></li>
   <li><a href="../examples/analogSampling.lua.html">analogSampling.lua</a></li>
   <li><a href="../examples/analogWrite.lua.html">analogWrite.lua</a></li>
   <li><a href="../examples/blink.lua.html">blink.lua</a></li>
   <li><a href="../examples/buttonInterrupt.lua.html">buttonInterrupt.lua</a></li>
-  <li><a href="../examples/capacitiveSensing.lua.html">capacitiveSensing.lua</a></li>
+  <li><strong>capacitiveSensing.lua</strong></li>
   <li><a href="../examples/changeConfiguration.lua.html">changeConfiguration.lua</a></li>
   <li><a href="../examples/digitalRead.lua.html">digitalRead.lua</a></li>
   <li><a href="../examples/digitalSampling.lua.html">digitalSampling.lua</a></li>
@@ -60,30 +60,30 @@
 
 <div id="content">
 
-    <h2>advancedAnalogRead.lua</h2>
+    <h2>capacitiveSensing.lua</h2>
 <pre>
 <span class="keyword">local</span> gainer = <span class="global">require</span> <span class="string">'gainer'</span>
 
 <span class="comment">---
-</span><span class="comment">-- More advanced example for reading analog input on gainer device.
+</span><span class="comment">-- Simple example for capacitive sensing in continuous mode on gainer device.
+</span><span class="comment">-- TODO: make practical example of connection
 </span>
 <span class="keyword">local</span> board = gainer.new()
 
 <span class="keyword">local</span> <span class="keyword">function</span> setup()
-  board:init()
-  board:setSamplingMode(gainer.AIN_ONLY) <span class="comment">--or ALL_PORTS
-</span><span class="keyword">end</span>
+  board:init(<span class="keyword">nil</span>, <span class="number">8</span>) <span class="comment">--Capacitive sensing mode
+</span>  board:setSensitivity(<span class="number">1</span>)
+<span class="keyword">end</span>
 
 <span class="keyword">local</span> <span class="keyword">function</span> loop()
-  board:setGain(gainer.VSS, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, VSS reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.VSS, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, VSS reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, AGND reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, AGND reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
+  <span class="comment">-- digitalRead function is used to check if board was touched or not
+</span>  <span class="comment">-- On gainer device, reading only 1 input like this:
+</span>  <span class="global">print</span>(<span class="string">"Single input:"</span>, board:digitalRead(<span class="number">1</span>))
+  <span class="comment">-- uses different command than reading multiple inputs like this:
+</span>  <span class="global">print</span>(<span class="string">"Multiple input:"</span>, board:digitalRead(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>))
+  <span class="comment">-- but both methods can be used.
+</span>
+   board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
 </span><span class="keyword">end</span>
 
 board:start(setup, loop)</pre>

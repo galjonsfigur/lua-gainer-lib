@@ -31,7 +31,7 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>advancedAnalogRead.lua</strong></li>
+  <li><a href="../examples/advancedAnalogRead.lua.html">advancedAnalogRead.lua</a></li>
   <li><a href="../examples/analogRead.lua.html">analogRead.lua</a></li>
   <li><a href="../examples/analogSampling.lua.html">analogSampling.lua</a></li>
   <li><a href="../examples/analogWrite.lua.html">analogWrite.lua</a></li>
@@ -43,7 +43,7 @@
   <li><a href="../examples/digitalSampling.lua.html">digitalSampling.lua</a></li>
   <li><a href="../examples/digitalWrite.lua.html">digitalWrite.lua</a></li>
   <li><a href="../examples/getVersion.lua.html">getVersion.lua</a></li>
-  <li><a href="../examples/ledDimming.lua.html">ledDimming.lua</a></li>
+  <li><strong>ledDimming.lua</strong></li>
   <li><a href="../examples/ledMatrix.lua.html">ledMatrix.lua</a></li>
   <li><a href="../examples/matrixRandom.lua.html">matrixRandom.lua</a></li>
 </ul>
@@ -60,31 +60,30 @@
 
 <div id="content">
 
-    <h2>advancedAnalogRead.lua</h2>
+    <h2>ledDimming.lua</h2>
 <pre>
 <span class="keyword">local</span> gainer = <span class="global">require</span> <span class="string">'gainer'</span>
 
 <span class="comment">---
-</span><span class="comment">-- More advanced example for reading analog input on gainer device.
+</span><span class="comment">-- Simple example for LED diode dimming via potentiometer
+</span><span class="comment">-- using analogRead and analogWrite on gainer device.
+</span><span class="comment">-- Commection diagram:
+</span><span class="comment">-- LED pin to aout 0
+</span><span class="comment">-- Edge Pins of potentiometer to 5V and GND
+</span><span class="comment">-- Middle pin of potentiometer to ain 0
 </span>
 <span class="keyword">local</span> board = gainer.new()
 
+<span class="keyword">local</span> result = <span class="number">0</span>
+
 <span class="keyword">local</span> <span class="keyword">function</span> setup()
   board:init()
-  board:setSamplingMode(gainer.AIN_ONLY) <span class="comment">--or ALL_PORTS
-</span><span class="keyword">end</span>
+<span class="keyword">end</span>
 
 <span class="keyword">local</span> <span class="keyword">function</span> loop()
-  board:setGain(gainer.VSS, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, VSS reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.VSS, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, VSS reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, AGND reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, AGND reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
-</span><span class="keyword">end</span>
+  result = board:analogRead(<span class="number">1</span>)
+  board:analogWrite(gainer.SINGLE, <span class="number">1</span>, result)
+<span class="keyword">end</span>
 
 board:start(setup, loop)</pre>
 

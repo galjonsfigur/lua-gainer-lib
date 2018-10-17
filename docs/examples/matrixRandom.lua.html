@@ -31,7 +31,7 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>advancedAnalogRead.lua</strong></li>
+  <li><a href="../examples/advancedAnalogRead.lua.html">advancedAnalogRead.lua</a></li>
   <li><a href="../examples/analogRead.lua.html">analogRead.lua</a></li>
   <li><a href="../examples/analogSampling.lua.html">analogSampling.lua</a></li>
   <li><a href="../examples/analogWrite.lua.html">analogWrite.lua</a></li>
@@ -45,7 +45,7 @@
   <li><a href="../examples/getVersion.lua.html">getVersion.lua</a></li>
   <li><a href="../examples/ledDimming.lua.html">ledDimming.lua</a></li>
   <li><a href="../examples/ledMatrix.lua.html">ledMatrix.lua</a></li>
-  <li><a href="../examples/matrixRandom.lua.html">matrixRandom.lua</a></li>
+  <li><strong>matrixRandom.lua</strong></li>
 </ul>
 <h2>Programs</h2>
 <ul class="nowrap">
@@ -60,30 +60,35 @@
 
 <div id="content">
 
-    <h2>advancedAnalogRead.lua</h2>
+    <h2>matrixRandom.lua</h2>
 <pre>
 <span class="keyword">local</span> gainer = <span class="global">require</span> <span class="string">'gainer'</span>
 
 <span class="comment">---
-</span><span class="comment">-- More advanced example for reading analog input on gainer device.
+</span><span class="comment">-- Another example for using 8x8 LED Matrix with GAINER device.
 </span>
 <span class="keyword">local</span> board = gainer.new()
 
+<span class="keyword">local</span> buffer = {}
+<span class="keyword">local</span> line = <span class="string">""</span>
+
 <span class="keyword">local</span> <span class="keyword">function</span> setup()
-  board:init()
-  board:setSamplingMode(gainer.AIN_ONLY) <span class="comment">--or ALL_PORTS
-</span><span class="keyword">end</span>
+  board:init(<span class="keyword">nil</span>, <span class="number">7</span>)
+<span class="keyword">end</span>
 
 <span class="keyword">local</span> <span class="keyword">function</span> loop()
-  board:setGain(gainer.VSS, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, VSS reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.VSS, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, VSS reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, AGND reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, AGND reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
+
+  <span class="keyword">for</span> i = <span class="number">1</span>, <span class="number">8</span> <span class="keyword">do</span>
+    <span class="keyword">for</span> j = <span class="number">1</span>, <span class="number">8</span> <span class="keyword">do</span>
+      <span class="keyword">local</span> noise = <span class="global">math</span>.random(<span class="number">0</span>, <span class="number">15</span>)
+      line = line .. <span class="global">string</span>.format(<span class="string">"%x"</span>, noise)
+    <span class="keyword">end</span>
+    buffer[i] = <span class="global">tonumber</span>(<span class="string">"0x"</span> .. line)
+    line = <span class="string">""</span>
+  <span class="keyword">end</span>
+
+  board:setMatrix(buffer)
+  gainer.sleep(<span class="number">0.06</span>) <span class="comment">-- Reduce flickering
 </span><span class="keyword">end</span>
 
 board:start(setup, loop)</pre>

@@ -31,7 +31,7 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>advancedAnalogRead.lua</strong></li>
+  <li><a href="../examples/advancedAnalogRead.lua.html">advancedAnalogRead.lua</a></li>
   <li><a href="../examples/analogRead.lua.html">analogRead.lua</a></li>
   <li><a href="../examples/analogSampling.lua.html">analogSampling.lua</a></li>
   <li><a href="../examples/analogWrite.lua.html">analogWrite.lua</a></li>
@@ -44,7 +44,7 @@
   <li><a href="../examples/digitalWrite.lua.html">digitalWrite.lua</a></li>
   <li><a href="../examples/getVersion.lua.html">getVersion.lua</a></li>
   <li><a href="../examples/ledDimming.lua.html">ledDimming.lua</a></li>
-  <li><a href="../examples/ledMatrix.lua.html">ledMatrix.lua</a></li>
+  <li><strong>ledMatrix.lua</strong></li>
   <li><a href="../examples/matrixRandom.lua.html">matrixRandom.lua</a></li>
 </ul>
 <h2>Programs</h2>
@@ -60,31 +60,52 @@
 
 <div id="content">
 
-    <h2>advancedAnalogRead.lua</h2>
+    <h2>ledMatrix.lua</h2>
 <pre>
 <span class="keyword">local</span> gainer = <span class="global">require</span> <span class="string">'gainer'</span>
 
 <span class="comment">---
-</span><span class="comment">-- More advanced example for reading analog input on gainer device.
+</span><span class="comment">-- Simple example for using 8x8 LED Matrix with GAINER device.
 </span>
 <span class="keyword">local</span> board = gainer.new()
 
+<span class="keyword">local</span> checkerboardA = {
+<span class="number">0x0F0F0F0F</span>,
+<span class="number">0xF0F0F0F0</span>,
+<span class="number">0x0F0F0F0F</span>,
+<span class="number">0xF0F0F0F0</span>,
+<span class="number">0x0F0F0F0F</span>,
+<span class="number">0xF0F0F0F0</span>,
+<span class="number">0x0F0F0F0F</span>,
+<span class="number">0xF0F0F0F0</span>
+}
+
+<span class="keyword">local</span> checkerboardB = {
+<span class="number">0xF0F0F0F0</span>,
+<span class="number">0x0F0F0F0F</span>,
+<span class="number">0xF0F0F0F0</span>,
+<span class="number">0x0F0F0F0F</span>,
+<span class="number">0xF0F0F0F0</span>,
+<span class="number">0x0F0F0F0F</span>,
+<span class="number">0xF0F0F0F0</span>,
+<span class="number">0x0F0F0F0F</span>
+}
+
 <span class="keyword">local</span> <span class="keyword">function</span> setup()
-  board:init()
-  board:setSamplingMode(gainer.AIN_ONLY) <span class="comment">--or ALL_PORTS
-</span><span class="keyword">end</span>
+  board:init(<span class="keyword">nil</span>, <span class="number">7</span>)
+<span class="keyword">end</span>
 
 <span class="keyword">local</span> <span class="keyword">function</span> loop()
-  board:setGain(gainer.VSS, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, VSS reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.VSS, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, VSS reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, AGND reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, AGND reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
-</span><span class="keyword">end</span>
+  <span class="comment">--There are two ways to set MED Matrix: by setMatrix function like this:
+</span>  board:setMatrix(checkerboardA)
+  board:wait(<span class="number">1</span>)
+  <span class="comment">--Or by simple for loop and analogWrite function like this:
+</span>  <span class="keyword">for</span> i, value <span class="keyword">in</span> <span class="global">ipairs</span>(checkerboardB) <span class="keyword">do</span>
+    board:analogWrite(gainer.SINGLE, i, value)
+  <span class="keyword">end</span>
+  <span class="comment">--Second option is slower and flickering can be seen.
+</span>  board:wait(<span class="number">1</span>)
+<span class="keyword">end</span>
 
 board:start(setup, loop)</pre>
 

@@ -31,12 +31,12 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>advancedAnalogRead.lua</strong></li>
+  <li><a href="../examples/advancedAnalogRead.lua.html">advancedAnalogRead.lua</a></li>
   <li><a href="../examples/analogRead.lua.html">analogRead.lua</a></li>
   <li><a href="../examples/analogSampling.lua.html">analogSampling.lua</a></li>
   <li><a href="../examples/analogWrite.lua.html">analogWrite.lua</a></li>
   <li><a href="../examples/blink.lua.html">blink.lua</a></li>
-  <li><a href="../examples/buttonInterrupt.lua.html">buttonInterrupt.lua</a></li>
+  <li><strong>buttonInterrupt.lua</strong></li>
   <li><a href="../examples/capacitiveSensing.lua.html">capacitiveSensing.lua</a></li>
   <li><a href="../examples/changeConfiguration.lua.html">changeConfiguration.lua</a></li>
   <li><a href="../examples/digitalRead.lua.html">digitalRead.lua</a></li>
@@ -60,31 +60,38 @@
 
 <div id="content">
 
-    <h2>advancedAnalogRead.lua</h2>
+    <h2>buttonInterrupt.lua</h2>
 <pre>
 <span class="keyword">local</span> gainer = <span class="global">require</span> <span class="string">'gainer'</span>
 
 <span class="comment">---
-</span><span class="comment">-- More advanced example for reading analog input on gainer device.
+</span><span class="comment">-- Example for using button interrupt to control on-board LED on gainer device.
 </span>
 <span class="keyword">local</span> board = gainer.new()
 
+<span class="keyword">local</span> prevButtonState = <span class="keyword">false</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> buttonChanged(data)
+  <span class="global">print</span>(<span class="string">"Button:"</span>, data)
+  <span class="keyword">if</span> data ~= prevButtonState <span class="keyword">then</span>
+    <span class="keyword">if</span> data == <span class="keyword">true</span> <span class="keyword">then</span>
+    board:digitalWrite(gainer.HIGH, gainer.LED)
+    <span class="keyword">else</span>
+    board:digitalWrite(gainer.LOW, gainer.LED)
+    <span class="keyword">end</span>
+  <span class="keyword">end</span>
+  prevButtonState = data
+<span class="keyword">end</span>
+
 <span class="keyword">local</span> <span class="keyword">function</span> setup()
   board:init()
-  board:setSamplingMode(gainer.AIN_ONLY) <span class="comment">--or ALL_PORTS
-</span><span class="keyword">end</span>
+  board:attatchInterrupt(<span class="string">"button"</span>, buttonChanged)
+<span class="keyword">end</span>
 
 <span class="keyword">local</span> <span class="keyword">function</span> loop()
-  board:setGain(gainer.VSS, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, VSS reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.VSS, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, VSS reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">1</span>)
-  <span class="global">print</span>(<span class="string">"Minimum gain, AGND reference:"</span>, board:analogRead(<span class="number">1</span>))
-  board:setGain(gainer.AGND, <span class="number">16</span>)
-  <span class="global">print</span>(<span class="string">"Maximum gain, AGND reference:"</span>,board:analogRead(<span class="number">1</span>))
-  board:wait(<span class="number">1</span>) <span class="comment">-- Wait 1 second to not spam console
-</span><span class="keyword">end</span>
+ <span class="comment">-- Wait to not clog the CPU
+</span> gainer.sleep(<span class="number">0.01</span>)
+<span class="keyword">end</span>
 
 board:start(setup, loop)</pre>
 
