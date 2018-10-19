@@ -236,7 +236,7 @@ end
 ---
 -- Sets the function to run when interrupt is detected.
 -- @param isrName Interrupt name. The only one avarible now is "button".
--- @param isr function name that wil be attached. 
+-- @param isr function name that wil be attached.
 function board:attatchInterrupt(isrName, isr)
   self.interrupts[isrName].isr = isr
 end
@@ -254,28 +254,40 @@ function board:wait(time)
 end
 
 ---
--- Gets digital outuput of GAINER board.
+-- Gets digital output of GAINER board.
 -- @param ... input numbers of GAINER board. For din 0 it will be 1, for
 -- all digital inputs it will be 1,2,3,4 and so on.
 -- @return output table with booleans. For digital 1 it will be true and for digital 0 it
 -- will be false. table index with value is equal to argument number. It can also set a on-board
 -- LED when gainer.LED is used as parameter. Order of arguments does not matter.
 function board:digitalRead(...)
-  local result, input
+  local result, input, highByte, lowByte
 
   _sendCommand(commands.getAllDigital)
   result = _waitForResponse(commands.getAllDigital, self)
   assert(result, "Error: Check board or support of command in configuraion")
 
-  result = tonumber(string.match(result, "(%d%d%d%d)"))
-  for i = 0, configurations[self.configuration][2] do
-    input = bit.band(1, bit.rshift(result, i))
-    if input == 1 then self.lastDigitalInput[i + 1] = true
-    else self.lastDigitalInput[i + 1] = false end
+  highByte = tonumber("0x"..string.match(result, "(%x%x)%x%x"))
+  lowByte = tonumber("0x"..string.match(result, "%x%x(%x%x)"))
+
+  for i = 0, 7 do
+    input = bit.band(1, bit.rshift(lowByte, i))
+    if input == 1 then
+      self.lastDigitalInput[i + 1] = true
+    else
+      self.lastDigitalInput[i + 1] = false
+    end
+
+    input = bit.band(1, bit.rshift(highByte, i))
+    if input == 1 then
+      self.lastDigitalInput[i + 9] = true
+    else
+      self.lastDigitalInput[i + 9] = false
+    end
   end
 
   -- If there are additional arguments
-  if select("#", ...) > 0 and select("#", ...) <= configurations[self.configuration][2] then
+  if select("#", ...) > 0 then
     local output = {}
     for i = 1, select("#", ...) do
       table.insert(output, #output + 1, self.lastDigitalInput[(select(i, ...))])
@@ -352,7 +364,7 @@ end
 -- Functions resets GAIENR device ans sets it to a new configuration.
 -- State of pins after reset is undefined.
 -- @param configuration configutation number.
--- 
+--
 function board:setConfiguration(configuration)
   if configuration ~= self.configuration then
     self.configuration = configuration
