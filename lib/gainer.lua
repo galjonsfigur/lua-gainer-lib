@@ -111,6 +111,22 @@ end
 function M.sleep(s)
   native.sleep(s)
 end
+
+---
+--TODO:test
+-- Arduino-like function that remaps a number from one range to another.
+-- A value of fromLow would get mapped to toLow, a value
+-- of fromHigh to toHigh, values in-between to values in-between, etc.
+-- @param value value to remap.
+-- @param fromLow Lowest possible value from value range.
+-- @param fromHigh Highest possible value from value range.
+-- @param toLow Lowest possible value from desired range.
+-- @param toHigh Highest possible value from desired range.
+-- @return result Remapped value.
+function M.map(value, fromLow, fromHigh, toLow, toHigh)
+  return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
+end
+
 -- Serial interface is table to be able to pass it to coroutine as reference, not as a value.
 local _serialListener = coroutine.create( function(serialInterface)
   local serialBuffer = " "
@@ -258,8 +274,7 @@ end
 -- @param ... input numbers of GAINER board. For din 0 it will be 1, for
 -- all digital inputs it will be 1,2,3,4 and so on.
 -- @return output table with booleans. For digital 1 it will be true and for digital 0 it
--- will be false. table index with value is equal to argument number. It can also set a on-board
--- LED when gainer.LED is used as parameter. Order of arguments does not matter.
+-- will be false. Table index with value is equal to argument number.
 function board:digitalRead(...)
   local result, input, highByte, lowByte
 
@@ -301,7 +316,8 @@ end
 -- @param mode State to set on pin or pins. For digital 1 gainer.HIGH is used and for
 -- digital 0 gaier.LOW is used.
 -- @param ... output numbers of board. For dout 0 it will be 1 and for all all digital
--- outputs it will be 1,2,3,4 and so on.
+-- outputs it will be 1,2,3,4 and so on. It can also set a on-board
+-- LED when gainer.LED is used as parameter. Order of arguments does not matter.
 function board:digitalWrite(mode, ...)
   assert(select("#", ...) ~= 0, "Error: not enough arguments.")
   if select("#", ...) == 1 then
@@ -377,6 +393,13 @@ function board:setConfiguration(configuration)
   end
 end
 
+---
+-- Reads analog value from pins of GAINER device.
+-- @param ... input numbers of GAINER board. For ain 0 it will be 1, for
+-- all analog inputs it will be 1,2,3,4 and so on.
+-- @return output table with integers with values between 0 an 255 - from 0V to 5V. That value can be
+-- remapped using gainer.map function.
+-- Table index with value is equal to argument number.
 function board:analogRead(...)
   local result = ""
   -- Single pin read
@@ -419,6 +442,12 @@ function board:analogRead(...)
   end
 end
 
+---
+-- Sets lights on 8x8 LED matrix connected to GAINER board. 
+-- It does it in one long command allowing faster refresh time
+-- comparing to analogWrite function.
+-- @param table table with 8 numbers. To read it hex format is used.
+-- For example number 0x0f0f0f0f will light every second LED on matrix.
 function board:setMatrix(table)
   if self.configuration ~= 7 then
      print("Warning: board is not in matrix mode 7")

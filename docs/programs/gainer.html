@@ -84,6 +84,11 @@
 	<td class="summary">Halts execution of script for s seconds.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#map">map (value, fromLow, fromHigh, toLow, toHigh)</a></td>
+	<td class="summary">TODO:test
+ Arduino-like function that remaps a number from one range to another.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#board:init">board:init (serialPort, configuration)</a></td>
 	<td class="summary">Inits gainer library.</td>
 	</tr>
@@ -97,7 +102,7 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#board:digitalRead">board:digitalRead (...)</a></td>
-	<td class="summary">Gets digital outuput of GAINER board.</td>
+	<td class="summary">Gets digital output of GAINER board.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#board:digitalWrite">board:digitalWrite (mode, ...)</a></td>
@@ -106,6 +111,14 @@
 	<tr>
 	<td class="name" nowrap><a href="#board:setConfiguration">board:setConfiguration (configuration)</a></td>
 	<td class="summary">Sets new configuration of GAINER device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#board:analogRead">board:analogRead (...)</a></td>
+	<td class="summary">Reads analog value from pins of GAINER device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#board:setMatrix">board:setMatrix (table)</a></td>
+	<td class="summary">Sets lights on 8x8 LED matrix connected to GAINER board.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#board:analogWrite">board:analogWrite (mode, ...)</a></td>
@@ -136,6 +149,46 @@
         </li>
     </ul>
 
+
+
+
+
+</dd>
+    <dt>
+    <a name = "map"></a>
+    <strong>map (value, fromLow, fromHigh, toLow, toHigh)</strong>
+    </dt>
+    <dd>
+    TODO:test
+ Arduino-like function that remaps a number from one range to another.
+ A value of fromLow would get mapped to toLow, a value
+ of fromHigh to toHigh, values in-between to values in-between, etc.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+         value to remap.
+        </li>
+        <li><span class="parameter">fromLow</span>
+         Lowest possible value from value range.
+        </li>
+        <li><span class="parameter">fromHigh</span>
+         Highest possible value from value range.
+        </li>
+        <li><span class="parameter">toLow</span>
+         Lowest possible value from desired range.
+        </li>
+        <li><span class="parameter">toHigh</span>
+         Highest possible value from desired range.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        result Remapped value.
+    </ol>
 
 
 
@@ -216,7 +269,7 @@
     <strong>board:digitalRead (...)</strong>
     </dt>
     <dd>
-    Gets digital outuput of GAINER board.
+    Gets digital output of GAINER board.
 
 
     <h3>Parameters:</h3>
@@ -230,9 +283,8 @@
     <h3>Returns:</h3>
     <ol>
 
-         output table with booleans. For digital 1 it will be true and for digital 0 it
- will be false. table index with value is equal to argument number. It can also set a on-board
- LED when gainer.LED is used as parameter. Order of arguments does not matter.
+        output table with booleans. For digital 1 it will be true and for digital 0 it
+ will be false. Table index with value is equal to argument number.
     </ol>
 
 
@@ -255,7 +307,8 @@
         </li>
         <li><span class="parameter">...</span>
          output numbers of board. For dout 0 it will be 1 and for all all digital
- outputs it will be 1,2,3,4 and so on.
+ outputs it will be 1,2,3,4 and so on. It can also set a on-board
+ LED when gainer.LED is used as parameter. Order of arguments does not matter.
         </li>
     </ul>
 
@@ -278,6 +331,57 @@
     <ul>
         <li><span class="parameter">configuration</span>
          configutation number.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "board:analogRead"></a>
+    <strong>board:analogRead (...)</strong>
+    </dt>
+    <dd>
+    Reads analog value from pins of GAINER device.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         input numbers of GAINER board. For ain 0 it will be 1, for
+ all analog inputs it will be 1,2,3,4 and so on.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+         output table with integers with values between 0 an 255 - from 0V to 5V. That value can be
+ remapped using gainer.map function.
+ Table index with value is equal to argument number.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "board:setMatrix"></a>
+    <strong>board:setMatrix (table)</strong>
+    </dt>
+    <dd>
+    Sets lights on 8x8 LED matrix connected to GAINER board. <br/>
+ It does it in one long command allowing faster refresh time
+ comparing to analogWrite function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">table</span>
+         table with 8 numbers. To read it hex format is used.
+ For example number 0x0f0f0f0f will light every second LED on matrix.
         </li>
     </ul>
 
@@ -321,7 +425,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="https://github.com/eruber/LDoc">LDoc 1.4.7</a></i>
-<i style="float:right;">Last updated 2018-10-17 12:14:16 </i>
+<i style="float:right;">Last updated 2018-10-23 14:54:24 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
