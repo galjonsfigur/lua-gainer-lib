@@ -1,11 +1,81 @@
-to generate documentation:
-cd lua-gainer-lib
-ldoc -c docs/config.ld lib/gainer.lua 
+lua-gainer-lib
+==============
 
-ain - prot 1, 
-din - port 2
-aout - port 3
-dout - port 4
+![GAINER board](gainer-without-goldpins.png "GAINER board")
 
-TODO: Add experimantal functions like setting PWM parameters, notifying on change of pins 
-TODO: Clean up firmware
+A simple LuaJIT library to control GAINER - an USB I/O board for educational purpose. It uses serial port connection and simple commands
+allowing for easily use digital input and analog input from environment or
+control any devices like LEDs or servos by digital and analog outputs.
+For now only Unix-like systems are supported. Tested on GNU/Linux but it should also work on any *BSD system.
+
+Simple documentation is available in docs folder. It can be generated using LDoc script like this:
+
+<code>
+    cd lua-gainer-lib
+    ldoc -c docs/config.ld lib/gainer.lua 
+</code>
+
+To test examples:
+
+<code>
+    cd lua-gainer-lib/lib
+    luajit ../examples/blink.lua
+</code> 
+
+
+Only LuaJIT is supported now because of C FFI that is used to communicate to tremios C library to connect to serial port.
+
+GAINER board uses Cypress CY8C29466 microcontroller which has amazing amount of digital and analog peripherals. To use full potential GAINER firmware uses different configurations that are changing amount or type of inputs or outputs.
+
+<code>
+    ......................................................................................................................................................
+    : Configuration  :  Analog inputs  :  Digital inputs  :  Analog outputs  :  Digital outputs  :  Comments                                             :
+    :................:.................:..................:..................:...................:.......................................................:
+    : 0              :  0              :  0               :  0               :  0                :  initial configuration just after rebooting           :
+    : 1              :  4              :  4               :  4               :  4                :  default configuration                                :
+    : 2              :  8              :  0               :  4               :  4                :  -                                                    :
+    : 3              :  4              :  4               :  8               :  0                :  -                                                    :
+    : 4              :  8              :  0               :  8               :  0                :  -                                                    :
+    : 5              :  0              :  16              :  0               :  0                :  -                                                    :
+    : 6              :  0              :  0               :  0               :  16               :  -                                                    :
+    : 7              :  0              :  8               :  8               :  0                :  matrix LED control mode                              :
+    : 8              :  0              :  8               :  0               :  8                :  capacitive sensing switch mode (first 4 ports only)  :
+    :................:.................:..................:..................:...................:.......................................................:
+</code>
+
+For convenience lua-gainer-lib uses different port numbers than original.
+
+<code>
+    ....................................................
+    : Label on board  :  Port           :  Port number :
+    :.................:.................:..............:
+    : ain             :  Analog input   :  1           :
+    : din             :  Digital input  :  2           :
+    : aout            :  Analog output  :  3           :
+    : dout            :  Digital output :  4           :
+    :.................:.................:..............:
+</code>
+
+If using configuration that has more than 4 pins of 1 type of I/O ports from next port are used.
+
+TODO:
+----
+
+- Add experimental functions like setting PWM parameters, notifying on change of pins
+
+- Add support for Windows
+
+- Test on *BSD and Mac
+
+- Add tests
+
+- Clean up firmware
+
+- Add luarock definition
+
+License
+-------
+
+MIT
+
+Author: galion
