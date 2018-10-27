@@ -2,7 +2,7 @@
 -- LuaJIT library to control GAINER - an USB I/O board
 -- for educational purpose. It uses serial port connection and simple commands
 -- allowing for easily use digital input and analog input from environment or
--- control any devices like LEDS or servos by digital and analog outputs.
+-- control any devices like LEDs or servos by digital and analog outputs.
 -- @script gainer
 -- @author galion
 -- @license MIT
