@@ -1,8 +1,8 @@
 ---
 -- LuaJIT library to control GAINER - an USB I/O board
 -- for educational purpose. It uses serial port connection and simple commands
--- allowing for easily use digital input, digital output, analog input
--- and analog output from environment.
+-- allowing for easily use digital input and analog input from environment or
+-- control any devices like LEDS or servos by digital and analog outputs.
 -- @script gainer
 -- @author galion
 -- @license MIT
@@ -45,17 +45,21 @@ local commands = {
   getVersion =      {command = "?*", responseRegex =  "?(%d%.%d%.%d.*)%*"}
 }
 
+---
+-- Table with modes, parameters, and constants.
+-- @table M
 local M = {
-  HIGH = true,
-  LOW = false,
-  LED = 0,
-  SINGLE = 1,
-  MULTI = 2,
-  VSS = false,
-  AGND = true,
-  ALL_PORTS = false,
-  AIN_ONLY = true
+  HIGH = true, -- High (5V) state of pin.
+  LOW = false, -- Low (GND) Low state of pin.
+  LED = 0, -- On-board LED pin.
+  SINGLE = 1, -- Mode used to change only one analog pin output.
+  MULTI = 2, -- Mode used to write to all analog pins.
+  VSS = false, -- Voltage reference or analog-to-digital converters connected to 5V.
+  AGND = true, -- Voltage reference or analog-to-digital converters connected to GND.
+  ALL_PORTS = false, -- Mode used to sample from all avarible analog ports.
+  AIN_ONLY = true -- Mode used to sample only from ain ports.
 }
+
 -- Analog inputs, Digital inputs, Analog outputs, Digital outputs
 local configurations = {
 [0] = {0, 0, 0, 0},
@@ -78,7 +82,7 @@ local board = {
   serialInterface = {shrinkBuffer = 0}, -- Counting from the end of serial buffer
   -- Gainer parameters
   configuration = 1,
-  continousMode = {status = false, command = {}},
+  continuousMode = {status = false, command = {}},
   lastDigitalInput = {},
   lastAnalogInput = {},
   lastAnalogOutput = {},
@@ -113,16 +117,15 @@ function M.sleep(s)
 end
 
 ---
---TODO:test
--- Arduino-like function that remaps a number from one range to another.
+-- Arduino-like function that re-maps a number from one range to another.
 -- A value of fromLow would get mapped to toLow, a value
 -- of fromHigh to toHigh, values in-between to values in-between, etc.
--- @param value value to remap.
+-- @param value value to re-map.
 -- @param fromLow Lowest possible value from value range.
 -- @param fromHigh Highest possible value from value range.
 -- @param toLow Lowest possible value from desired range.
 -- @param toHigh Highest possible value from desired range.
--- @return result Remapped value.
+-- @return result Re-mapped value.
 function M.map(value, fromLow, fromHigh, toLow, toHigh)
   return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
 end
@@ -271,9 +274,9 @@ end
 
 ---
 -- Gets digital output of GAINER board.
--- @param ... input numbers of GAINER board. For din 0 it will be 1, for
+-- @param ... Input numbers of GAINER board. For din 0 it will be 1, for
 -- all digital inputs it will be 1,2,3,4 and so on.
--- @return output table with booleans. For digital 1 it will be true and for digital 0 it
+-- @return Output table with booleans. For digital 1 it will be true and for digital 0 it
 -- will be false. Table index with value is equal to argument number.
 function board:digitalRead(...)
   local result, input, highByte, lowByte
@@ -315,7 +318,7 @@ end
 -- Turns on or off digital outputs of GAINER board.
 -- @param mode State to set on pin or pins. For digital 1 gainer.HIGH is used and for
 -- digital 0 gaier.LOW is used.
--- @param ... output numbers of board. For dout 0 it will be 1 and for all all digital
+-- @param ... Output numbers of board. For dout 0 it will be 1 and for all all digital
 -- outputs it will be 1,2,3,4 and so on. It can also set a on-board
 -- LED when gainer.LED is used as parameter. Order of arguments does not matter.
 function board:digitalWrite(mode, ...)
@@ -377,9 +380,9 @@ end
 
 ---
 -- Sets new configuration of GAINER device.
--- Functions resets GAIENR device ans sets it to a new configuration.
+-- Functions resets GAIENR device and sets it to a new configuration.
 -- State of pins after reset is undefined.
--- @param configuration configutation number.
+-- @param configuration configuration number.
 --
 function board:setConfiguration(configuration)
   if configuration ~= self.configuration then
@@ -397,9 +400,9 @@ end
 -- Reads analog value from pins of GAINER device.
 -- @param ... input numbers of GAINER board. For ain 0 it will be 1, for
 -- all analog inputs it will be 1,2,3,4 and so on.
--- @return output table with integers with values between 0 an 255 - from 0V to 5V. That value can be
--- remapped using gainer.map function.
--- Table index with value is equal to argument number.
+-- @return Output table with integers with values between 0 an 255 - from 0V to 5V. That value can be
+-- re-mapped using gainer.map function. Table index with value is equal to argument number.
+-- @see map
 function board:analogRead(...)
   local result = ""
   -- Single pin read
@@ -448,6 +451,7 @@ end
 -- comparing to analogWrite function.
 -- @param table table with 8 numbers. To read it hex format is used.
 -- For example number 0x0f0f0f0f will light every second LED on matrix.
+-- @see analogWrite
 function board:setMatrix(table)
   if self.configuration ~= 7 then
      print("Warning: board is not in matrix mode 7")
@@ -468,11 +472,19 @@ function board:setMatrix(table)
   end
 end
 
---- ... = port/column number, value OR values for all ports
--- Can be used to control 8x8 LED Matrix
+---
+-- Sets analog outputs of GAINER board.
+-- @param mode Writing mode for writing analog values. There are two modes:
+-- SINGlE that  changes only one analog output and MULTI that sets all of analog
+-- outputs.
+-- @param ... For single mode there are two arguments needed. First is port number and
+-- second is value for that port from 0 to 255. If GAINER board is set at configuration 7 port number is
+-- column number and value is from 0 to 4294967295 (from 0x00000000 to 0xFFFFFFFF) to set matrix led row.
+-- @see M
+-- @see setMatrix
 function board:analogWrite(mode, ...)
   if mode == M.SINGLE then
-    assert(select("#", ...) == 2, "Error: not enough arguments.")
+    assert(select("#", ...) == 2, "Error: wrong number of arguments.")
     if self.configuration ~= 7 then
       _sendCommand({
         command = (string.gsub(
@@ -520,16 +532,29 @@ function board:analogWrite(mode, ...)
     self.lastAnalogOutput = output
   end
 end
+
+---
+-- Gets sample from continuous mode from GAINER device.
+-- @param ... Port numbers from which sample will be returned. All samples will
+-- be written to internal field of board table and can be returned via
+-- getLastDigitalInput or getLastAnalogInput for ger digital or analog samples respectively.
+-- @return table with values if analog sampling is used or booleans for digital sampling.
+-- For digital 1 it will be true and for digital 0 it will be false.
+-- For analog sampling integers with values between 0 an 255 - from 0V to 5V. That value can be
+-- re-mapped using gainer.map function.
+-- Table index with value is equal to argument number.
+-- @see map
 function board:getSample(...)
-  if not self.continousMode.status then
-    print("Warning: board in not in continous mode")
+  if not self.continuousMode.status then
+    print("Warning: board in not in continuous mode")
     return
   end
 
-  local result = _waitForResponse(self.continousMode.command, self)
+  local result = _waitForResponse(self.continuousMode.command, self)
   assert(result, "Error: check board or support of command in configuration")
-  if self.continousMode.command == commands.getAllAnalog4C
-  or self.continousMode.command == commands.getAllAnalog8C then
+  
+  if self.continuousMode.command == commands.getAllAnalog4C
+  or self.continuousMode.command == commands.getAllAnalog8C then
     local i = 1
     for value in string.gmatch(result, "(%x%x)") do
       self.lastAnalogInput[i] = tonumber("0x"..value)
@@ -542,15 +567,27 @@ function board:getSample(...)
       end
       return unpack(output)
     end
-  elseif self.continousMode.command == commands.getAllDigitalC then
-    result = tonumber(string.match(result, "(%d%d%d%d)"))
-    for i = 0, configurations[self.configuration][2] do
-      if bit.band(1, bit.rshift(result, i)) == 1 then self.lastDigitalInput[i + 1] = true
-      else self.lastDigitalInput[i + 1] = false end
-    end
+  elseif self.continuousMode.command == commands.getAllDigitalC then
+    local highByte, lowByte, input
+    highByte = tonumber("0x"..string.match(result, "(%x%x)%x%x"))
+    lowByte = tonumber("0x"..string.match(result, "%x%x(%x%x)"))
 
-    -- If there are additional arguments
-    if select("#", ...) > 0 and select("#", ...) <= configurations[self.configuration][2] then
+    for i = 0, 7 do
+      input = bit.band(1, bit.rshift(lowByte, i))
+      if input == 1 then
+        self.lastDigitalInput[i + 1] = true
+      else
+        self.lastDigitalInput[i + 1] = false
+      end
+       
+      input = bit.band(1, bit.rshift(highByte, i))
+      if input == 1 then
+        self.lastDigitalInput[i + 9] = true
+      else
+        self.lastDigitalInput[i + 9] = false
+      end
+    end
+    if select("#", ...) > 0 then
       local output = {}
       for i = 1, select("#", ...) do
         table.insert(output, #output + 1, self.lastDigitalInput[(select(i, ...))])
@@ -560,45 +597,62 @@ function board:getSample(...)
   end
 end
 
+---
+-- Exits continuous mode if GAINER board was set to it.  
 function board:endSampling()
-  if self.continousMode.status then
+  if self.continuousMode.status then
     _sendCommand(commands.exitContinous)
     _waitForResponse(commands.exitContinous, self)
-    self.continousMode.status = false
-    self.continousMode.command = {}
+    self.continuousMode.status = false
+    self.continuousMode.command = {}
   else
-    print("Warning: board is not in continous mode.")
+    print("Warning: board is not in continuous mode.")
   end
 end
 
+---
+-- Sets GAINER board in continuous mode to read analog-to-digital converters
+-- and send values from them automatically.
+-- In that mode some commands might be inaccessible.
+-- @see getSample
+-- @see endSampling
 function board:beginAnalogSampling()
   if configurations[self.configuration][1] == 4 then
     _sendCommand(commands.getAllAnalog4C)
     _waitForResponse(commands.getAllAnalog4C, self)
-    self.continousMode.status = true
-    self.continousMode.command = commands.getAllAnalog4C
+    self.continuousMode.status = true
+    self.continuousMode.command = commands.getAllAnalog4C
   elseif configurations[self.configuration][1] == 8 then
     _sendCommand(commands.getAllAnalog8C)
     _waitForResponse(commands.getAllAnalog8C, self)
-    self.continousMode.status = true
-    self.continousMode.command = commands.getAllAnalog8C
+    self.continuousMode.status = true
+    self.continuousMode.command = commands.getAllAnalog8C
   else
     print("Error: analog sampling is not supported in current configuration.")
   end
 end
 
+---
+-- Sets GAINER board in continuous mode to read digital values from all pins
+-- and send values from them automatically.
+-- In that mode some commands might be inaccessible.
+-- @see getSample
+-- @see endSampling
 function board:beginDigitalSampling()
   if configurations[self.configuration][2] ~= 0 then
     _sendCommand(commands.getAllDigitalC)
     _waitForResponse(commands.getAllDigitalC, self)
-    self.continousMode.status = true
-    self.continousMode.command = commands.getAllDigitalC
+    self.continuousMode.status = true
+    self.continuousMode.command = commands.getAllDigitalC
   else
     print("Error: digital sampling is not supported in current configuration.")
   end
 end
 
--- Value from 1 to 16
+---
+-- Sets sensitivity for capacitive sensors.
+-- @param value Capacitive sensitivity.
+-- Can be set from 1 to 16 where 16 is most sensitive selection. 
 function board:setSensitivity(value)
   if self.configuration ~= 8 then
     print("Error: Capacitive sensing is not supported in current configuration.")
@@ -611,6 +665,15 @@ function board:setSensitivity(value)
   end
 end
 
+---
+-- Sets sampling mode For GAINER board.
+-- @param mode Sampling mode. There are two sampling modes:
+-- ALL_PORTS (default setting) all ports will be sampled. This can reduce
+-- accuracy of sampling but the difference is very little.
+-- 
+-- AIN_ONLY - only ain port of GAINER board will be sampled. it can increase
+-- accuracy and speed of sampling.
+-- @see M 
 function board:setSamplingMode(mode)
   if mode then
    _sendCommand({
@@ -627,6 +690,14 @@ function board:setSamplingMode(mode)
 end
 
 -- value from 1 to 16
+
+---
+-- Sets gain of programmable gain amplifiers
+-- and reference of analog-to-digital converters of GAINER board.
+-- @param reference Analog-to-digital converter voltage reference. There are two
+-- references: VSS which is 5V and AGND which is default setting.
+-- @param value Programmable gain amplifier gain. It can be set from 1 to 16. 16 will have
+-- 48x gain. More information can be found in source code of GAINER firmware.
 function board:setGain(reference, value)
   if reference then
     _sendCommand({
@@ -646,6 +717,9 @@ function board:setGain(reference, value)
   _waitForResponse(commands.setGain, self)
 end
 
+---
+-- Prints version of GAINER firmware. Can only run in configuration 0.
+-- @return GAINER firmware version.
 function board:getVersion()
   _sendCommand(commands.getVersion)
   local result = _waitForResponse(commands.getVersion, self)
@@ -655,22 +729,45 @@ end
 
 -- Boilerplate functions
 
+---
+-- Sets debug mode.
+-- @param mode Set to true for enabling debug output or false to disable it.
+-- Disabled is default setting.
 function board:setDebug(mode)
   self.debug = mode
 end
 
+---
+-- Sets verbose mode of GAINER firmware.
+-- @param mode Set to true for enabling it. In this mode GAINER will respond for
+-- all commands to confirm them. This takes time and processing power to read them, but it
+-- guarantees that all commands will be checked for confirmation.
+-- Set false to disable it - it's the default setting.
+-- Requires setting before initialization or reset of the board. This can be achieved
+-- via setConfiguration function.
+-- @see setConfiguration
 function board:setVerbose(mode)
   self.verbose = mode
 end
 
+---
+-- @return table of booleans of last saved of sampled digital input
 function board:getLastDigitalInput()
   return self.lastDigitalInput
 end
 
+---
+-- @return table of integers of last saved of sampled analog input
 function board:getLastAnalogInput()
   return self.lastAnalogInput
 end
 
+---
+-- Starts the script to control GAINER board. It is used to set
+-- setup and loop functions to imitate arduino-like sketch.
+-- Both functions are optional but recommended.
+-- @param setup Function that will be ran only one time
+-- @param loop  Function that will be ran forever
 function board:start(setup, loop)
   setup = setup or function() end
   loop = loop or function() return end
@@ -678,14 +775,18 @@ function board:start(setup, loop)
   setup()
   while true do
   loop()
-  if self.continousMode.status then
+  if self.continuousMode.status then
     self:getSample()
   end
   _checkInterrupt(self)
   end
 end
 
+---
+-- Creates new board object.
+-- @return board Board object
 function M.new()
   return board
 end
+
 return M
