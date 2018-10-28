@@ -78,4 +78,4 @@ License
 
 MIT
 
-Author: galion
+Author: galion (galion at sdf org)
