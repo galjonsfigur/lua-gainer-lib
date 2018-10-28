@@ -20,7 +20,7 @@ To test examples:
 <code>
     cd lua-gainer-lib/lib
     luajit ../examples/blink.lua
-</code> 
+</code>
 
 
 Only LuaJIT is supported now because of C FFI that is used to communicate to tremios C library to connect to serial port.
@@ -61,6 +61,7 @@ GAINER board uses Cypress CY8C29466 microcontroller which has amazing amount of 
 For convenience lua-gainer-lib uses different port numbers than original.
 
 <code>
+
     ....................................................
     
     : Label on board  :  Port           :  Port number :
@@ -76,6 +77,7 @@ For convenience lua-gainer-lib uses different port numbers than original.
     : dout            :  Digital output :  4           :
     
     :.................:.................:..............:
+    
 </code>
 
 If using configuration that has more than 4 pins of 1 type of I/O ports from next port are used.
