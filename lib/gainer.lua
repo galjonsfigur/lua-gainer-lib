@@ -216,7 +216,7 @@ end
 
 ---
 -- Inits gainer library.
--- @param serialPort Serial port that is connected to GAIER board like "/dev/ttyS0".
+-- @param serialPort Serial port that is connected to GAINER board like "/dev/ttyS0".
 -- Default port is "/dev/ttyUSB0"
 -- @param configuration Configuration number to set when GAINER board is connected.
 -- Default configuration is 1.
@@ -255,7 +255,7 @@ end
 ---
 -- Sets the function to run when interrupt is detected.
 -- @param isrName Interrupt name. The only one avarible now is "button".
--- @param isr function name that wil be attached.
+-- @param isr function name that will be attached.
 function board:attatchInterrupt(isrName, isr)
   self.interrupts[isrName].isr = isr
 end
@@ -283,7 +283,7 @@ function board:digitalRead(...)
 
   _sendCommand(commands.getAllDigital)
   result = _waitForResponse(commands.getAllDigital, self)
-  assert(result, "Error: Check board or support of command in configuraion")
+  assert(result, "Error: Check board or support of command in configuration")
 
   highByte = tonumber("0x"..string.match(result, "(%x%x)%x%x"))
   lowByte = tonumber("0x"..string.match(result, "%x%x(%x%x)"))
@@ -412,7 +412,7 @@ function board:analogRead(...)
      responseRegex = commands.getAnalog.responseRegex
    })
    result = _waitForResponse(commands.getAnalog, self)
-   assert(result, "Error: Check board or support of command in configuraion")
+   assert(result, "Error: Check board or support of command in configuration")
    result = tonumber("0x"..string.match(result, "S(%x%x)%*"))
    self.lastAnalogInput[(select(1, ...))] = result
    return result
@@ -537,7 +537,7 @@ end
 -- Gets sample from continuous mode from GAINER device.
 -- @param ... Port numbers from which sample will be returned. All samples will
 -- be written to internal field of board table and can be returned via
--- getLastDigitalInput or getLastAnalogInput for ger digital or analog samples respectively.
+-- getLastDigitalInput or getLastAnalogInput for digital or analog samples respectively.
 -- @return table with values if analog sampling is used or booleans for digital sampling.
 -- For digital 1 it will be true and for digital 0 it will be false.
 -- For analog sampling integers with values between 0 an 255 - from 0V to 5V. That value can be
