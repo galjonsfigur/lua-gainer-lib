@@ -95,8 +95,6 @@ TODO:
 
 - Clean up firmware
 
-- Add luarock definition
-
 License
 -------
 

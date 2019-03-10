@@ -7,7 +7,7 @@
 -- @author galion
 -- @license MIT
 
-local native = require 'nativeFunctions'
+local native = require 'gainer.nativeFunctions'
 
 local commands = {
   [0] =             {command = "KONFIGURATION_0*", responseRegex = "KONFIGURATION_0%*"},
