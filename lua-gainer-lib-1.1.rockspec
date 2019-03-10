@@ -1,7 +1,7 @@
 package = "lua-gainer-lib"
-version = "1.1"
+version = "1.1-1"
 source = {
-   url = "https://github.com/galjonsfigur/lua-gainer-lib",
+   url = "git://github.com/galjonsfigur/lua-gainer-lib",
    tag = "1.1"
 }
 description = {
