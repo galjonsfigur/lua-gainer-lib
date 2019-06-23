@@ -2,7 +2,7 @@ package = "lua-gainer-lib"
 version = "1.1-1"
 source = {
    url = "git://github.com/galjonsfigur/lua-gainer-lib",
-   tag = "1.1"
+   tag = "v1.1"
 }
 description = {
    summary = "A simple LuaJIT library to control GAINER board.",
